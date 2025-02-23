@@ -1,8 +1,4 @@
-name: "Custom CodeQL Configuration"
-
-queries:
-  - uses: security-extended
-  - uses: security-and-quality
+name: "JavaScript CodeQL Config"
 
 paths:
   - src
@@ -12,9 +8,3 @@ paths-ignore:
   - '**/build'
   - '**/*.test.js'
   - '**/__tests__'
-
-query-filters:
-  - exclude:
-      problem.severity:
-        - warning
-        - recommendation
