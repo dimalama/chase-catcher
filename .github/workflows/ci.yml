@@ -162,19 +162,17 @@ jobs:
     - name: Install dependencies
       run: npm ci
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: javascript
-        tools: latest
-        config: disable
+        tools: linked
         queries: security-extended,security-and-quality
     - name: Build project
       run: npm run build
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
       with:
         category: "/language:javascript"
-        upload: true
     - name: Run SonarCloud Scan
       if: github.event_name == 'pull_request'
       uses: SonarSource/sonarcloud-github-action@master
