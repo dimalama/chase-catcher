@@ -6,12 +6,12 @@
   "scripts": {
     "build": "webpack --config config/webpack.config.js",
     "watch": "webpack --watch --config config/webpack.config.js",
-    "test": "jest --config config/jest.config.js --ci --coverage --reporters=default --reporters=jest-junit",
+    "test": "jest --config config/jest.config.js --ci --coverage --passWithNoTests",
     "test:watch": "jest --watch --config config/jest.config.js",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
-    "format": "prettier --write src/",
-    "clean": "rm -rf dist/",
+    "lint": "eslint --config config/.eslintrc.json src/",
+    "lint:fix": "eslint --config config/.eslintrc.json src/ --fix",
+    "format": "prettier --config config/.prettierrc --write src/",
+    "clean": "rm -rf dist/ coverage/",
     "package": "npm run clean && npm run build && zip -r dist/chase-catcher.zip dist/ public/ manifest.json"
   },
   "repository": {
@@ -30,6 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
+    "babel-jest": "^29.5.0",
     "babel-loader": "^9.1.2",
     "eslint": "^8.42.0",
     "jest": "^29.5.0",

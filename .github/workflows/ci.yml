@@ -110,10 +110,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Run Snyk Security Scan
-      uses: snyk/actions/node@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     - name: Run CodeQL Analysis
       uses: github/codeql-action/init@v2
       with:
@@ -201,4 +197,3 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: chase-catcher.zip
-        generate_release_notes: true
