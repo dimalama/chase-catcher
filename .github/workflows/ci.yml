@@ -1,14 +1,53 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [ main ]
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [ main ]
   schedule:
     - cron: '0 0 * * 0'  # Weekly security scan
 
 jobs:
+  verify-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check PR Title
+      uses: amannn/action-semantic-pull-request@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        types: |
+          feat
+          fix
+          docs
+          style
+          refactor
+          perf
+          test
+          build
+          ci
+          chore
+          revert
+
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Check for outdated dependencies
+      run: npm outdated || true
+    - name: Audit dependencies
+      run: npm audit
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -18,9 +57,30 @@ jobs:
       with:
         node-version: '18.x'
         cache: 'npm'
-    - run: npm ci
-    - run: npm run lint
-    - run: npm run format
+    - name: Install dependencies
+      run: npm ci
+    - name: Run ESLint
+      run: npm run lint
+    - name: Check formatting
+      run: npm run format
+    - name: Report Lint Results
+      if: always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const results = process.env.LINT_RESULTS
+          if (results) {
+            const issues = JSON.parse(results)
+            const body = issues.map(issue => 
+              `- ${issue.filePath}:${issue.line} - ${issue.message}`
+            ).join('\n')
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Lint Issues Found\n${body}`
+            })
+          }
 
   test:
     runs-on: ubuntu-latest
@@ -31,17 +91,26 @@ jobs:
       with:
         node-version: '18.x'
         cache: 'npm'
-    - run: npm ci
-    - run: npm test
+    - name: Install dependencies
+      run: npm ci
+    - name: Run tests
+      run: npm test -- --coverage
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       if: always()
+    - name: Report Test Results
+      if: always()
+      uses: dorny/test-reporter@v1
+      with:
+        name: Jest Tests
+        path: coverage/junit.xml
+        reporter: jest-junit
 
   security:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Run security scan
+    - name: Run Snyk Security Scan
       uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -51,6 +120,12 @@ jobs:
         languages: javascript
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
+    - name: Run SonarCloud Scan
+      if: github.event_name == 'pull_request'
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
@@ -62,8 +137,10 @@ jobs:
       with:
         node-version: '18.x'
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build
+    - name: Install dependencies
+      run: npm ci
+    - name: Build extension
+      run: npm run build
     - name: Package Extension
       run: npm run package
     - name: Upload extension artifact
@@ -73,13 +150,49 @@ jobs:
         path: dist/chase-catcher.zip
         retention-days: 5
 
-  release:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  size:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    needs: [build]
     steps:
     - uses: actions/checkout@v3
-    - name: Download built extension
+    - name: Download extension artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: chase-catcher-extension
+    - name: Compare bundle size
+      uses: preactjs/compressed-size-action@v2
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        pattern: "dist/**/*.{js,css,html,json}"
+
+  preview:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+    - name: Download extension artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: chase-catcher-extension
+    - name: Create PR Comment
+      uses: actions/github-script@v6
+      with:
+        script: |
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '🎉 Preview build is ready!\nYou can download the extension from the artifacts section.'
+          })
+
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Download extension artifact
       uses: actions/download-artifact@v3
       with:
         name: chase-catcher-extension
