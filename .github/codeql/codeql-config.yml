@@ -8,3 +8,21 @@ paths-ignore:
   - '**/build'
   - '**/*.test.js'
   - '**/__tests__'
+
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+  - name: Custom JavaScript Security Rules
+    uses: ./.github/codeql/custom-queries/javascript
+
+query-filters:
+  - exclude:
+      problem.severity:
+        - note
+        - recommendation
+
+extraction:
+  javascript:
+    index-format: "hierarchical"
+    trap-cache: true
+    debug: false

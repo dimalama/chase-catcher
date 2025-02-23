@@ -148,6 +148,8 @@ jobs:
       contents: read
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
@@ -165,19 +167,15 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: javascript
+        queries: security-extended,security-and-quality
+        config-file: ./.github/codeql/codeql-config.yml
     - name: Build project
       run: npm run build
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:javascript"
-        setup-python-dependencies: false
-    - name: Run SonarCloud Scan
-      if: github.event_name == 'pull_request'
-      uses: SonarSource/sonarcloud-github-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        upload: true
 
   build:
     runs-on: ubuntu-latest
