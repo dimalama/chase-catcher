@@ -1,0 +1,52 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.vs/
+
+# Build files
+*.zip
+dist/
+build/
+
+# Dependency directories
+node_modules/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Chrome Extension packaging
+*.pem
+*.crx
+
+# Chrome Web Store assets
+store_assets/
+release_notes.md
+release_notes.txt
+performance_report.md
+CHANGELOG.md
+
+# Test coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+*.log

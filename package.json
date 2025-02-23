@@ -1,0 +1,41 @@
+{
+  "name": "chase-catcher",
+  "version": "1.0.0",
+  "description": "Chrome extension to automatically activate Chase credit card offers",
+  "main": "src/js/background.js",
+  "scripts": {
+    "build": "webpack --config config/webpack.config.js",
+    "watch": "webpack --watch --config config/webpack.config.js",
+    "test": "jest --config config/jest.config.js",
+    "test:watch": "jest --watch --config config/jest.config.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write src/",
+    "clean": "rm -rf dist/",
+    "package": "npm run clean && npm run build && zip -r dist/chase-catcher.zip dist/ public/ manifest.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dimalama/chase-catcher"
+  },
+  "keywords": [
+    "chrome-extension",
+    "chase",
+    "credit-card",
+    "rewards",
+    "automation"
+  ],
+  "author": "Dima Lukianenko",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "babel-loader": "^9.1.2",
+    "eslint": "^8.42.0",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "prettier": "^2.8.8",
+    "webpack": "^5.85.0",
+    "webpack-cli": "^5.1.1"
+  }
+}
