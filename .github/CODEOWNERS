@@ -1,0 +1,14 @@
+# Global code owner
+* @dimalama
+
+# Specific code ownership
+/src/ @dimalama
+/public/ @dimalama
+/config/ @dimalama
+/.github/ @dimalama
+/manifest.json @dimalama
+/package.json @dimalama
+
+# Documentation ownership
+*.md @dimalama
+LICENSE @dimalama
