@@ -166,19 +166,14 @@ jobs:
       with:
         languages: javascript
         queries: security-extended,security-and-quality
+        config-file: ./.github/codeql/codeql-config.yml
     - name: Build project
       run: npm run build
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
       with:
-        category: "/language:javascript"
+        category: "/language:javascript/advanced"
         upload: true
-        output: sarif-results
-    - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v2
-      if: always()
-      with:
-        sarif_file: sarif-results/javascript.sarif
     - name: Run SonarCloud Scan
       if: github.event_name == 'pull_request'
       uses: SonarSource/sonarcloud-github-action@master
