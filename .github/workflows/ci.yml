@@ -117,10 +117,13 @@ jobs:
         JEST_JUNIT_OUTPUT_NAME: junit.xml
     - name: Upload coverage reports
       uses: codecov/codecov-action@v4
-      if: always()
+      continue-on-error: true
+      if: github.repository == 'dimalama/chase-catcher' && (github.event_name == 'push' || github.event_name == 'pull_request')
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: true
+        fail_ci_if_error: false
+        flags: unittests
+        verbose: true
     - name: Report Test Results
       if: always()
       uses: dorny/test-reporter@v1
