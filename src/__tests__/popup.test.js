@@ -1,4 +1,19 @@
+// Mock popup.js module
+jest.mock('../js/popup', () => {
+  const actual = jest.requireActual('../js/popup');
+  return {
+    ...actual,
+    initializePopup: jest.fn()
+  };
+});
+
 describe('Popup Interface', () => {
+  let messageListener;
+  let startBtn;
+  let stopBtn;
+  let statusDiv;
+  let progressFill;
+
   beforeEach(() => {
     // Reset DOM
     document.body.innerHTML = `
@@ -7,124 +22,113 @@ describe('Popup Interface', () => {
         <p class="subtitle">Automate Your Rewards</p>
       </div>
       <div class="button-container">
-        <button id="startButton">Start Catching</button>
+        <button id="startBtn">Start Catching</button>
+        <button id="stopBtn" style="display: none;">Stop Catching</button>
       </div>
       <div class="status">
-        <p id="statusText">Ready to catch rewards!</p>
+        <p id="status">Ready to catch rewards!</p>
       </div>
       <div class="progress-container">
         <div id="progressBar">
-          <div id="progressFill"></div>
+          <div id="progressFill" style="width: 0%"></div>
         </div>
       </div>
     `;
+
+    // Get DOM elements
+    startBtn = document.getElementById('startBtn');
+    stopBtn = document.getElementById('stopBtn');
+    statusDiv = document.getElementById('status');
+    progressFill = document.getElementById('progressFill');
     
     // Reset chrome mocks
-    chrome.tabs.query.mockClear();
-    chrome.tabs.sendMessage.mockClear();
-    chrome.runtime.onMessage.addListener.mockClear();
+    chrome.tabs.query.mockReset();
+    chrome.tabs.sendMessage.mockReset();
+    chrome.runtime.onMessage.addListener.mockReset();
+
+    // Set up message listener capture
+    chrome.runtime.onMessage.addListener.mockImplementation((fn) => {
+      messageListener = fn;
+    });
+
+    // Initialize popup
+    require('../js/popup');
+
+    // Trigger message listener setup
+    const event = new Event('DOMContentLoaded');
+    document.dispatchEvent(event);
   });
 
   describe('Initial State', () => {
     it('should show correct initial UI state', () => {
       expect(document.querySelector('.title').textContent).toBe('Chase-Catcher');
       expect(document.querySelector('.subtitle').textContent).toBe('Automate Your Rewards');
-      expect(document.getElementById('statusText').textContent).toBe('Ready to catch rewards!');
-      expect(document.getElementById('startButton').disabled).toBe(false);
+      expect(statusDiv.textContent).toBe('Ready to catch rewards!');
+      expect(startBtn.style.display).toBe('');
+      expect(stopBtn.style.display).toBe('none');
     });
   });
 
   describe('Button Functionality', () => {
     it('should handle start button click', () => {
-      const startButton = document.getElementById('startButton');
       const mockTab = { id: 1, url: 'https://creditcards.chase.com/rewards-credit-cards/rewards/offers' };
       
       chrome.tabs.query.mockImplementation((query, callback) => {
         callback([mockTab]);
       });
 
-      startButton.click();
+      chrome.tabs.sendMessage.mockImplementation((tabId, message, callback) => {
+        callback({ success: true });
+      });
+
+      startBtn.click();
       
       expect(chrome.tabs.query).toHaveBeenCalledWith(
         { active: true, currentWindow: true },
         expect.any(Function)
       );
-      expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(
-        mockTab.id,
-        { action: 'startHunting' },
-        expect.any(Function)
-      );
-    });
-
-    it('should disable button while processing', () => {
-      const startButton = document.getElementById('startButton');
-      chrome.tabs.query.mockImplementation((query, callback) => {
-        callback([{ id: 1, url: 'https://creditcards.chase.com/rewards-credit-cards/rewards/offers' }]);
-      });
-
-      startButton.click();
-      expect(startButton.disabled).toBe(true);
+      expect(startBtn.style.display).toBe('none');
+      expect(stopBtn.style.display).toBe('block');
     });
 
     it('should handle invalid URLs', () => {
-      const startButton = document.getElementById('startButton');
-      const statusText = document.getElementById('statusText');
-      
       chrome.tabs.query.mockImplementation((query, callback) => {
         callback([{ id: 1, url: 'https://example.com' }]);
       });
 
-      startButton.click();
-      
-      expect(statusText.textContent).toContain('Please navigate to Chase');
-      expect(startButton.disabled).toBe(false);
+      startBtn.click();
+      expect(statusDiv.textContent).toBe('❌ Error: Please open Chase offers page');
+      expect(startBtn.style.display).toBe('');
+      expect(stopBtn.style.display).toBe('none');
     });
   });
 
   describe('Progress Updates', () => {
     it('should update progress bar', () => {
-      const progressFill = document.getElementById('progressFill');
       const mockMessage = { action: 'updateProgress', progress: 50 };
-      
-      // Simulate message from content script
-      const messageListener = chrome.runtime.onMessage.addListener.mock.calls[0][0];
-      messageListener(mockMessage);
-      
+      messageListener(mockMessage, {}, () => {});
       expect(progressFill.style.width).toBe('50%');
     });
 
     it('should handle completion message', () => {
-      const statusText = document.getElementById('statusText');
-      const startButton = document.getElementById('startButton');
       const mockMessage = { action: 'huntingComplete' };
-      
-      // Simulate message from content script
-      const messageListener = chrome.runtime.onMessage.addListener.mock.calls[0][0];
-      messageListener(mockMessage);
-      
-      expect(statusText.textContent).toContain('Complete');
-      expect(startButton.disabled).toBe(false);
+      messageListener(mockMessage, {}, () => {});
+      expect(statusDiv.textContent).toBe('✨ Great job! All rewards caught!');
+      expect(startBtn.style.display).toBe('block');
+      expect(stopBtn.style.display).toBe('none');
     });
 
     it('should handle error message', () => {
-      const statusText = document.getElementById('statusText');
-      const startButton = document.getElementById('startButton');
       const mockMessage = { action: 'error', error: 'Test error' };
-      
-      // Simulate message from content script
-      const messageListener = chrome.runtime.onMessage.addListener.mock.calls[0][0];
-      messageListener(mockMessage);
-      
-      expect(statusText.textContent).toContain('Error');
-      expect(startButton.disabled).toBe(false);
+      messageListener(mockMessage, {}, () => {});
+      expect(statusDiv.textContent).toBe('❌ Error: Test error');
+      expect(startBtn.style.display).toBe('block');
+      expect(stopBtn.style.display).toBe('none');
     });
   });
 
   describe('Error Handling', () => {
     it('should handle message sending errors', () => {
-      const startButton = document.getElementById('startButton');
-      const statusText = document.getElementById('statusText');
-      
       chrome.tabs.query.mockImplementation((query, callback) => {
         callback([{ id: 1, url: 'https://creditcards.chase.com/rewards-credit-cards/rewards/offers' }]);
       });
@@ -133,24 +137,21 @@ describe('Popup Interface', () => {
         callback({ error: 'Failed to send message' });
       });
 
-      startButton.click();
-      
-      expect(statusText.textContent).toContain('Error');
-      expect(startButton.disabled).toBe(false);
+      startBtn.click();
+      expect(statusDiv.textContent).toBe('❌ Error: Please navigate to the Chase offers page');
+      expect(startBtn.style.display).toBe('');
+      expect(stopBtn.style.display).toBe('none');
     });
 
     it('should handle no active tab', () => {
-      const startButton = document.getElementById('startButton');
-      const statusText = document.getElementById('statusText');
-      
       chrome.tabs.query.mockImplementation((query, callback) => {
         callback([]);
       });
 
-      startButton.click();
-      
-      expect(statusText.textContent).toContain('Error');
-      expect(startButton.disabled).toBe(false);
+      startBtn.click();
+      expect(statusDiv.textContent).toBe('❌ Error: Please open Chase offers page');
+      expect(startBtn.style.display).toBe('');
+      expect(stopBtn.style.display).toBe('none');
     });
   });
 });

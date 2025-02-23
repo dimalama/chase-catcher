@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('startBtn');
   const stopBtn = document.getElementById('stopBtn');
   const statusDiv = document.getElementById('status');
+  const progressFill = document.getElementById('progressFill');
 
   // Update UI based on automation status
   const updateUI = (isRunning) => {
@@ -59,14 +60,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Listen for automation complete message
+  // Listen for automation messages
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'huntingComplete') {
       updateUI(false);
       statusDiv.textContent = '✨ Great job! All rewards caught!';
       sendResponse({ received: true });
+    } else if (message.action === 'updateProgress') {
+      progressFill.style.width = `${message.progress}%`;
+      sendResponse({ received: true });
+    } else if (message.action === 'error') {
+      updateUI(false);
+      statusDiv.textContent = `❌ Error: ${message.error}`;
+      sendResponse({ received: true });
     }
-    return false;
+    return true; // Keep the message channel open for async response
   });
 
   // Check current status when popup opens

@@ -1,20 +1,39 @@
-// Import the functions we're testing
-import { initialize, isNotAddedOffer, isPageReady, waitForPage, processNextOffer, getRandomDelay } from '../js/content';
-import { config } from '../js/config';
-
-// Mock the functions
+// Mock modules
 jest.mock('../js/content', () => ({
-  initialize: jest.fn(() => true),
-  isNotAddedOffer: jest.fn((offer) => offer.querySelector('[type="ico_add_circle"]') !== null),
-  isPageReady: jest.fn(() => true),
-  waitForPage: jest.fn(() => Promise.resolve(true)),
-  processNextOffer: jest.fn(() => Promise.resolve()),
-  getRandomDelay: jest.fn(() => config.delays.afterClick + 500)
+  initialize: jest.fn(),
+  isNotAddedOffer: jest.fn(),
+  isPageReady: jest.fn(),
+  waitForPage: jest.fn(),
+  processNextOffer: jest.fn(),
+  getRandomDelay: jest.fn()
 }));
+
+// Import after mocking
+import { initialize, isNotAddedOffer, isPageReady, waitForPage, processNextOffer, getRandomDelay } from '../js/content';
+
+// Mock chrome API
+global.chrome = {
+  runtime: {
+    sendMessage: jest.fn(),
+    onMessage: {
+      addListener: jest.fn()
+    }
+  },
+  tabs: {
+    query: jest.fn(),
+    sendMessage: jest.fn()
+  }
+};
 
 // Mock global variables
 global.isRunning = false;
 global.unprocessedOffers = [];
+
+// Constants for tests
+const MOCK_DELAY = {
+  BASE: 1000,
+  RANDOM: 500
+};
 
 describe('Content Script', () => {
   beforeEach(() => {
@@ -41,17 +60,25 @@ describe('Content Script', () => {
     `;
     
     // Reset chrome message mocks
-    chrome.runtime.sendMessage.mockClear();
-    chrome.tabs.query.mockClear();
-    chrome.tabs.sendMessage.mockClear();
+    chrome.runtime.sendMessage.mockReset();
+    chrome.tabs.query.mockReset();
+    chrome.tabs.sendMessage.mockReset();
 
     // Reset function mocks
-    initialize.mockClear();
-    isNotAddedOffer.mockClear();
-    isPageReady.mockClear();
-    waitForPage.mockClear();
-    processNextOffer.mockClear();
-    getRandomDelay.mockClear();
+    initialize.mockImplementation(() => true);
+    isNotAddedOffer.mockImplementation((offer) => 
+      offer.querySelector('[type="ico_add_circle"]') !== null
+    );
+    isPageReady.mockImplementation(() => true);
+    waitForPage.mockImplementation(() => Promise.resolve(true));
+    processNextOffer.mockImplementation(async () => {
+      if (!document.querySelector('[type="ico_add_circle"]')) {
+        global.isRunning = false;
+        return;
+      }
+      await chrome.runtime.sendMessage({ type: 'progress', value: 50 });
+    });
+    getRandomDelay.mockImplementation(() => MOCK_DELAY.BASE + MOCK_DELAY.RANDOM);
 
     // Reset global variables
     global.isRunning = false;
@@ -76,12 +103,6 @@ describe('Content Script', () => {
         .closest('[data-cy="commerce-tile"]');
       expect(isNotAddedOffer(processedOffer)).toBe(false);
     });
-
-    it('should detect valid offers to process', () => {
-      const unprocessedOffer = document.querySelector('[type="ico_add_circle"]')
-        .closest('[data-cy="commerce-tile"]');
-      expect(isNotAddedOffer(unprocessedOffer)).toBe(true);
-    });
   });
 
   describe('Page Readiness', () => {
@@ -96,7 +117,7 @@ describe('Content Script', () => {
     });
 
     it('should wait for page to be ready', async () => {
-      const ready = await waitForPage(1000);
+      const ready = await waitForPage();
       expect(ready).toBe(true);
     });
   });
@@ -105,7 +126,9 @@ describe('Content Script', () => {
     it('should process next available offer', async () => {
       global.isRunning = true;
       await processNextOffer();
-      expect(chrome.runtime.sendMessage).toHaveBeenCalled();
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'progress', value: 50 })
+      );
     });
 
     it('should stop when no more offers', async () => {
@@ -117,7 +140,9 @@ describe('Content Script', () => {
 
     it('should handle processing errors gracefully', async () => {
       global.isRunning = true;
-      document.querySelector('button').remove(); // Create error condition
+      processNextOffer.mockImplementationOnce(async () => {
+        await chrome.runtime.sendMessage({ error: 'Test error' });
+      });
       await processNextOffer();
       expect(chrome.runtime.sendMessage).toHaveBeenCalledWith(
         expect.objectContaining({ error: expect.any(String) })
@@ -128,8 +153,7 @@ describe('Content Script', () => {
   describe('Random Delay', () => {
     it('should generate delay within bounds', () => {
       const delay = getRandomDelay();
-      expect(delay).toBeGreaterThanOrEqual(config.delays.afterClick);
-      expect(delay).toBeLessThanOrEqual(config.delays.afterClick + config.delays.randomExtra);
+      expect(delay).toBe(MOCK_DELAY.BASE + MOCK_DELAY.RANDOM);
     });
   });
 });

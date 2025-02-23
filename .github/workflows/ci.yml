@@ -9,6 +9,12 @@ on:
   schedule:
     - cron: '0 0 * * 0'  # Weekly security scan
 
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+  pull-requests: write
+
 jobs:
   verify-pr:
     if: github.event_name == 'pull_request'
@@ -114,14 +120,23 @@ jobs:
 
   security:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
     steps:
     - uses: actions/checkout@v3
-    - name: Run CodeQL Analysis
+    - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
       with:
         languages: javascript
+        queries: security-and-quality
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:javascript"
     - name: Run SonarCloud Scan
       if: github.event_name == 'pull_request'
       uses: SonarSource/sonarcloud-github-action@master
