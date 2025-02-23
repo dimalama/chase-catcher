@@ -16,10 +16,13 @@ module.exports = {
   reporters: [
     'default',
     ['jest-junit', {
-      outputDirectory: '../coverage',
+      outputDirectory: './coverage',
       outputName: 'junit.xml',
       classNameTemplate: '{filepath}',
-      titleTemplate: '{title}'
+      titleTemplate: '{title}',
+      ancestorSeparator: ' › ',
+      suiteNameTemplate: '{filepath}',
+      reportTestSuiteErrors: true
     }]
   ],
   testPathIgnorePatterns: [
