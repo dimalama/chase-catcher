@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![ChaseCatcher Logo](icon128.png)
+![ChaseCatcher Logo](./public/icons/icon128.png)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 ![Platform](https://img.shields.io/badge/platform-Chrome-green.svg)
