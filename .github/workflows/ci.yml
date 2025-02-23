@@ -14,6 +14,7 @@ permissions:
   contents: read
   security-events: write
   pull-requests: write
+  checks: write
 
 jobs:
   verify-pr:
@@ -90,6 +91,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js
@@ -126,17 +130,31 @@ jobs:
       contents: read
     steps:
     - uses: actions/checkout@v3
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
       with:
         languages: javascript
-        queries: security-and-quality
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+        queries: security-extended,security-and-quality
+    - name: Build project
+      run: npm run build
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
       with:
         category: "/language:javascript"
+        upload: true
+        output: sarif-results
+    - name: Upload SARIF file
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: sarif-results/javascript.sarif
     - name: Run SonarCloud Scan
       if: github.event_name == 'pull_request'
       uses: SonarSource/sonarcloud-github-action@master
