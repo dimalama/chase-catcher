@@ -19,19 +19,22 @@
     }
   },
   "permissions": [
-    "activeTab",
-    "scripting"
+    "activeTab"
   ],
   "host_permissions": [
-    "https://creditcards.chase.com/*"
+    "https://secure.chase.com/*"
   ],
   "background": {
     "service_worker": "src/js/background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://creditcards.chase.com/*"],
-      "js": ["src/js/content.js"]
+      "matches": [
+        "https://secure.chase.com/*"
+      ],
+      "js": [
+        "src/js/content.js"
+      ]
     }
   ],
   "minimum_chrome_version": "88",
