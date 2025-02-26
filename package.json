@@ -11,8 +11,8 @@
     "lint": "eslint --config config/.eslintrc.json src/",
     "lint:fix": "eslint --config config/.eslintrc.json src/ --fix",
     "format": "prettier --config config/.prettierrc --write src/",
-    "clean": "rm -rf dist/ coverage/",
-    "package": "npm run clean && npm run build && zip -r dist/chase-catcher.zip dist/ public/ manifest.json"
+    "clean": "rm -rf dist/ coverage/ package/",
+    "package": "npm run clean && npm run build && mkdir -p package && cp manifest.json package/ && cp -r public package/ && mkdir -p package/src/js && cp dist/*.js package/src/js/ && cd package && zip -r ../chase-catcher.zip * && cd .. && echo 'Package created at chase-catcher.zip'"
   },
   "repository": {
     "type": "git",
