@@ -7,9 +7,10 @@ const config = {
     offerTile: '[data-cy="commerce-tile"]',
     addButton: '[data-cy="commerce-tile-button"]',
     daysLeft: '[data-testid="days-left-banner"]',
-    merchantName: '.r9jbijk',
-    cashbackAmount: '.r9jbijj',
-    offerButtonContainer: '.r9jbij9'
+    // Use more reliable selectors with data attributes
+    merchantName: '.mds-body-small-heavier[class*="semanticColorTextRegular"]',
+    cashbackAmount: '.mds-body-large-heavier[class*="semanticColorTextRegular"]',
+    offerButtonContainer: '[data-cy="offer-tile-alert-container-success"]'
   },
   delays: {
     afterClick: 1500,     // Delay after clicking an offer button
@@ -49,9 +50,10 @@ const getRandomDelay = () => {
 const isPageReady = () => {
   const container = document.querySelector(config.selectors.offerContainer);
   if (!container) return false;
-  
-  const selector = `${config.selectors.offerButtonContainer}:has([data-cy="commerce-tile-button"][type="ico_add_circle"])`;
-  return document.querySelectorAll(selector).length > 0;
+
+  // Use data attributes which are more stable than class names
+  return document.querySelectorAll(config.selectors.offerTile).length > 0 &&
+         document.querySelectorAll(`[data-cy="commerce-tile-button"][type="ico_add_circle"]`).length > 0;
 };
 
 /**
@@ -61,7 +63,7 @@ const isPageReady = () => {
  */
 const waitForPage = async (maxWait = 3000) => {
   const startTime = Date.now();
-  
+
   while (Date.now() - startTime < maxWait) {
     if (isPageReady()) {
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -78,21 +80,21 @@ const waitForPage = async (maxWait = 3000) => {
  * @returns {boolean} True if offer is available and not yet added
  */
 const isNotAddedOffer = (offerDiv) => {
-  const tile = offerDiv.closest('[data-cy="commerce-tile"]');
+  const tile = offerDiv.closest(config.selectors.offerTile);
   if (!tile) return false;
-  
+
   const offerId = tile.id;
   if (processedOfferIds.has(offerId)) return false;
 
   const ariaLabel = tile.getAttribute('aria-label');
   if (!ariaLabel) return false;
-  
+
   if (ariaLabel.includes('Success Added')) {
     processedOfferIds.add(offerId);
     return false;
   }
 
-  const icon = offerDiv.querySelector('[data-cy="commerce-tile-button"]');
+  const icon = offerDiv.querySelector(config.selectors.addButton);
   if (!icon) return false;
 
   const iconType = icon.getAttribute('type');
@@ -108,10 +110,16 @@ const isNotAddedOffer = (offerDiv) => {
  * Updates the list of unprocessed offers on the page
  */
 const refreshUnprocessedOffers = () => {
-  const selector = `${config.selectors.offerButtonContainer}:has([data-cy="commerce-tile-button"][type="ico_add_circle"])`;
-  const containers = document.querySelectorAll(selector);
-  
-  unprocessedOffers = [...containers].filter(isNotAddedOffer);
+  // Find all offer tiles first
+  const allTiles = Array.from(document.querySelectorAll(config.selectors.offerTile));
+
+  // Then filter to find those with add buttons
+  const containers = allTiles.filter(tile => {
+    const button = tile.querySelector('[data-cy="commerce-tile-button"][type="ico_add_circle"]');
+    return button !== null;
+  });
+
+  unprocessedOffers = containers.filter(isNotAddedOffer);
   console.log(`🎯 Found ${unprocessedOffers.length} uncaught rewards to process`);
 };
 
@@ -145,18 +153,18 @@ const processNextOffer = async () => {
   }
 
   try {
-    const offerTile = nextOffer.closest('[data-cy="commerce-tile"]');
-    const merchant = offerTile.querySelector(config.selectors.merchantName)?.textContent || 'Unknown';
-    const cashback = offerTile.querySelector(config.selectors.cashbackAmount)?.textContent || '';
-    const daysLeft = offerTile.querySelector(config.selectors.daysLeft)?.textContent || '';
+    // Find merchant and cashback info using more reliable selectors
+    const merchant = nextOffer.querySelector(config.selectors.merchantName)?.textContent || 'Unknown';
+    const cashback = nextOffer.querySelector(config.selectors.cashbackAmount)?.textContent || '';
+    const daysLeft = nextOffer.querySelector(config.selectors.daysLeft)?.textContent || '';
 
-    const addButton = nextOffer.querySelector('[data-cy="commerce-tile-button"]');
+    const addButton = nextOffer.querySelector(config.selectors.addButton);
     if (!addButton) {
       throw new Error('Add button not found');
     }
 
     addButton.click();
-    processedOfferIds.add(offerTile.id); // Cache the processed offer ID
+    processedOfferIds.add(nextOffer.id); // Cache the processed offer ID
     console.log(`🎯 Capturing offer: ${merchant} - ${cashback} (${daysLeft})`);
 
     // Schedule navigation back and next offer processing
@@ -200,13 +208,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true });
       return false;
     }
-    
+
     if (message.action === 'stopHunting') {
       isRunning = false;
       sendResponse({ success: true });
       return false;
     }
-    
+
     if (message.action === 'getStatus') {
       sendResponse({ isRunning, success: true });
       return false;
@@ -222,9 +230,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  * Sends completion message to popup
  */
 const notifyComplete = () => {
-  chrome.runtime.sendMessage({ 
+  chrome.runtime.sendMessage({
     action: 'huntingComplete',
-    success: true 
+    success: true
   });
 };
 

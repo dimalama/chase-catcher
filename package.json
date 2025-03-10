@@ -1,6 +1,6 @@
 {
   "name": "chase-catcher",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Chrome extension to automatically activate Chase credit card offers",
   "main": "src/js/background.js",
   "scripts": {
