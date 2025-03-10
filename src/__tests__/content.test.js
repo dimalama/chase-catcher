@@ -41,19 +41,19 @@ describe('Content Script', () => {
     document.body.innerHTML = `
       <div data-testid="offerTileGridContainer">
         <div data-cy="commerce-tile" id="offer1">
-          <div class="r9jbij9">
+          <div data-cy="offer-tile-alert-container-success">
             <button data-cy="commerce-tile-button" type="ico_add_circle">Add</button>
           </div>
-          <div class="r9jbijk">Merchant 1</div>
-          <div class="r9jbijj">10% cashback</div>
+          <span class="mds-body-small-heavier semanticColorTextRegular">Merchant 1</span>
+          <span class="mds-body-large-heavier semanticColorTextRegular">10% cashback</span>
           <div data-testid="days-left-banner">5 days left</div>
         </div>
         <div data-cy="commerce-tile" id="offer2">
-          <div class="r9jbij9">
+          <div data-cy="offer-tile-alert-container-success">
             <button data-cy="commerce-tile-button" type="ico_checkmark_filled">Added</button>
           </div>
-          <div class="r9jbijk">Merchant 2</div>
-          <div class="r9jbijj">$50 bonus</div>
+          <span class="mds-body-small-heavier semanticColorTextRegular">Merchant 2</span>
+          <span class="mds-body-large-heavier semanticColorTextRegular">$50 bonus</span>
           <div data-testid="days-left-banner">3 days left</div>
         </div>
       </div>
