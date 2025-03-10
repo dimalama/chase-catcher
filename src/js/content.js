@@ -54,7 +54,7 @@ const isPageReady = () => {
 
   // Use data attributes which are more stable than class names
   return document.querySelectorAll(config.selectors.offerTile).length > 0 &&
-         document.querySelectorAll(`[data-cy="commerce-tile-button"]`).length > 0;
+         document.querySelectorAll(`[data-cy='commerce-tile-button']`).length > 0;
 };
 
 /**
@@ -116,7 +116,7 @@ const refreshUnprocessedOffers = () => {
 
   // Then filter to find those with add buttons
   const containers = allTiles.filter(tile => {
-    const button = tile.querySelector('[data-cy="commerce-tile-button"][type="ico_add_circle"]');
+    const button = tile.querySelector(`[data-cy='commerce-tile-button'][type='ico_add_circle']`);
     return button !== null;
   });
 
@@ -202,13 +202,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // Check for offer containers or tiles using multiple selectors to be more robust
       const offerContainer = document.querySelector(config.selectors.offerContainer);
       const offerTiles = document.querySelectorAll(config.selectors.offerTile);
-      
+
       if (!offerContainer && !offerTiles.length) {
         console.log('❌ No offers found - are you on the right page?');
         sendResponse({ success: false, error: 'Wrong page' });
         return false;
       }
-      
+
       isRunning = true;
       startHunting();
       sendResponse({ success: true });
@@ -225,7 +225,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ isRunning, success: true });
       return false;
     }
-    
+
     // Default response for unknown actions
     sendResponse({ success: false, error: 'Unknown action' });
   } catch (error) {
