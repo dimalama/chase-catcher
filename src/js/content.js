@@ -3,14 +3,14 @@
  */
 const config = {
   selectors: {
-    offerContainer: '[data-testid=\'offerTileGridContainer\']',
-    offerTile: '[data-cy=\'commerce-tile\']',
-    addButton: '[data-cy=\'commerce-tile-button\']',
-    daysLeft: '[data-testid=\'days-left-banner\']',
+    offerContainer: '[data-testid="offerTileGridContainer"]',
+    offerTile: '[data-cy="commerce-tile"]',
+    addButton: '[data-cy="commerce-tile-button"]',
+    daysLeft: '[data-testid="days-left-banner"]',
     // Use more reliable selectors with data attributes
-    merchantName: '.mds-body-small-heavier[class*=\'semanticColorTextRegular\']',
-    cashbackAmount: '.mds-body-large-heavier[class*=\'semanticColorTextRegular\']',
-    offerButtonContainer: '[data-cy=\'offer-tile-alert-container-success\']'
+    merchantName: '.mds-body-small-heavier[class*="semanticColorTextRegular"]',
+    cashbackAmount: '.mds-body-large-heavier[class*="semanticColorTextRegular"]',
+    offerButtonContainer: '[data-cy="offer-tile-alert-container-success"]'
   },
   delays: {
     afterClick: 1500,     // Delay after clicking an offer button
