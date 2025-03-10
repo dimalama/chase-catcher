@@ -3,14 +3,15 @@
  */
 const config = {
   selectors: {
-    offerContainer: '[data-testid="offerTileGridContainer"]',
+    offerContainer: '[data-testid="offerTileGridContainer"], .offerTileGridItemContainer',
     offerTile: '[data-cy="commerce-tile"]',
     addButton: '[data-cy="commerce-tile-button"]',
     daysLeft: '[data-testid="days-left-banner"]',
     // Use more reliable selectors with data attributes
     merchantName: '.mds-body-small-heavier[class*="semanticColorTextRegular"]',
     cashbackAmount: '.mds-body-large-heavier[class*="semanticColorTextRegular"]',
-    offerButtonContainer: '[data-cy="offer-tile-alert-container-success"]'
+    // Support both types of button containers
+    offerButtonContainer: '[data-cy="offer-tile-alert-container-success"], [class^="r9j"]'
   },
   delays: {
     afterClick: 1500,     // Delay after clicking an offer button
@@ -53,7 +54,7 @@ const isPageReady = () => {
 
   // Use data attributes which are more stable than class names
   return document.querySelectorAll(config.selectors.offerTile).length > 0 &&
-         document.querySelectorAll(`[data-cy='commerce-tile-button'][type='ico_add_circle']`).length > 0;
+         document.querySelectorAll(`[data-cy="commerce-tile-button"]`).length > 0;
 };
 
 /**
@@ -115,7 +116,7 @@ const refreshUnprocessedOffers = () => {
 
   // Then filter to find those with add buttons
   const containers = allTiles.filter(tile => {
-    const button = tile.querySelector('[data-cy=\'commerce-tile-button\'][type=\'ico_add_circle\']');
+    const button = tile.querySelector('[data-cy="commerce-tile-button"][type="ico_add_circle"]');
     return button !== null;
   });
 
@@ -198,11 +199,16 @@ const startHunting = () => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   try {
     if (message.action === 'startHunting') {
-      if (!document.querySelector(config.selectors.offerContainer)) {
-        console.log('❌ No offer container found - are you on the right page?');
+      // Check for offer containers or tiles using multiple selectors to be more robust
+      const offerContainer = document.querySelector(config.selectors.offerContainer);
+      const offerTiles = document.querySelectorAll(config.selectors.offerTile);
+      
+      if (!offerContainer && !offerTiles.length) {
+        console.log('❌ No offers found - are you on the right page?');
         sendResponse({ success: false, error: 'Wrong page' });
         return false;
       }
+      
       isRunning = true;
       startHunting();
       sendResponse({ success: true });
@@ -219,11 +225,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ isRunning, success: true });
       return false;
     }
+    
+    // Default response for unknown actions
+    sendResponse({ success: false, error: 'Unknown action' });
   } catch (error) {
     console.error('Error in message handler:', error);
     sendResponse({ success: false, error: error.message });
   }
-  return false;
+  return true; // Keep the message channel open for async response
 });
 
 /**
