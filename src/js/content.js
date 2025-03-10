@@ -54,7 +54,7 @@ const isPageReady = () => {
 
   // Use data attributes which are more stable than class names
   return document.querySelectorAll(config.selectors.offerTile).length > 0 &&
-         document.querySelectorAll(`[data-cy='commerce-tile-button']`).length > 0;
+         document.querySelectorAll('[data-cy="commerce-tile-button"]').length > 0;
 };
 
 /**
@@ -116,7 +116,7 @@ const refreshUnprocessedOffers = () => {
 
   // Then filter to find those with add buttons
   const containers = allTiles.filter(tile => {
-    const button = tile.querySelector(`[data-cy='commerce-tile-button'][type='ico_add_circle']`);
+    const button = tile.querySelector('[data-cy="commerce-tile-button"][type="ico_add_circle"]');
     return button !== null;
   });
 
