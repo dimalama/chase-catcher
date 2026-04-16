@@ -6,7 +6,7 @@
   <title>ChaseCatcher</title>
   <style>
     body {
-      width: 250px;
+      width: 260px;
       padding: 15px;
       font-family: Arial, sans-serif;
       background-color: #f8f9fa;
@@ -66,6 +66,42 @@
       border-radius: 4px;
       background-color: #fff;
     }
+
+    #progressBar {
+      display: none;
+      margin-top: 10px;
+      background: #ecf0f1;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    #progressFill {
+      width: 0%;
+      height: 100%;
+      background: #2ecc71;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    #offerCount {
+      text-align: center;
+      font-size: 12px;
+      color: #7f8c8d;
+      margin-top: 4px;
+      min-height: 16px;
+    }
+
+    #statsDisplay {
+      text-align: center;
+      font-size: 12px;
+      color: #95a5a6;
+      margin-top: 8px;
+      padding: 6px;
+      background-color: #fff;
+      border-radius: 4px;
+      min-height: 16px;
+    }
   </style>
 </head>
 
@@ -76,7 +112,12 @@
   <button id="startBtn">🎯 Start Catching</button>
   <button id="stopBtn">⏸ Stop</button>
   <div id="status">Ready to catch some rewards!</div>
-  <script src="../src/js/popup.js"></script>
+  <div id="progressBar">
+    <div id="progressFill"></div>
+  </div>
+  <div id="offerCount"></div>
+  <div id="statsDisplay"></div>
+  <script src="../dist/popup.js"></script>
 </body>
 
 </html>

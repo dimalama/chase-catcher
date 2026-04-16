@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 ![Platform](https://img.shields.io/badge/platform-Chrome-green.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
 
 </div>
 
@@ -55,25 +55,42 @@ git clone git@github.com:dimalama/chase-catcher.git
 ## 🛠️ Development
 
 ### Prerequisites
-- Google Chrome
-- Basic knowledge of JavaScript and Chrome Extension APIs
+- Node.js 18+
+- npm
 
 ### Setup
-1. Clone the repository
-2. Make your changes
-3. Test locally using Chrome's developer mode
-4. Submit a pull request
+```bash
+git clone git@github.com:dimalama/chase-catcher.git
+cd chase-catcher
+npm install
+npm run build
+npm test
+```
+
+### Available Scripts
+- `npm run build` — Production build
+- `npm run watch` — Rebuild on file changes
+- `npm test` — Run tests with coverage
+- `npm run typecheck` — TypeScript type checking
+- `npm run lint` — Lint source files
+- `npm run package` — Build and create a `.zip` for submission
 
 ### Project Structure
 ```
 chase-catcher/
-├── manifest.json        # Extension configuration
-├── popup.html          # Extension popup interface
-├── popup.js            # Popup logic
-├── content.js          # Core automation logic
-├── background.js       # Background scripts
-├── icons/              # Extension icons
-└── store_assets/       # Chrome Web Store assets
+├── manifest.json          # MV3 extension manifest
+├── public/
+│   ├── popup.html         # Extension popup UI
+│   └── icons/             # Extension icons (16, 48, 128)
+├── src/js/
+│   ├── content.ts         # Core offer detection & activation
+│   ├── popup.ts           # Popup logic & UI binding
+│   ├── background.ts      # Service worker & notifications
+│   └── types.ts           # Shared TypeScript interfaces
+├── src/__tests__/         # Jest unit & integration tests
+├── config/                # Webpack, Jest, ESLint, Prettier configs
+├── dist/                  # Compiled output (gitignored)
+└── store_assets/          # Chrome Web Store assets (gitignored)
 ```
 
 ## 🤝 Contributing
