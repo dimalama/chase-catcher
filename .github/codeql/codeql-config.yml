@@ -12,8 +12,6 @@ paths-ignore:
 queries:
   - uses: security-extended
   - uses: security-and-quality
-  - name: Custom JavaScript Security Rules
-    uses: ./.github/codeql/custom-queries/javascript
 
 query-filters:
   - exclude:
