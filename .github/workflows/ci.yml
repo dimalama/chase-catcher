@@ -83,7 +83,7 @@ jobs:
           const results = process.env.LINT_RESULTS
           if (results) {
             const issues = JSON.parse(results)
-            const body = issues.map(issue => 
+            const body = issues.map(issue =>
               `- ${issue.filePath}:${issue.line} - ${issue.message}`
             ).join('\n')
             await github.rest.issues.createComment({
@@ -152,7 +152,7 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: javascript
-        queries: security-extended
+        config-file: ./.github/codeql/codeql-config.yml
     - name: Build project
       run: npm run build
     - name: Perform CodeQL Analysis
@@ -251,12 +251,12 @@ jobs:
             .filter(([_, job]) => job.result === 'failure')
             .map(([name]) => name)
             .join(', ')
-          
+
           const message = `### ❌ Workflow Failed
           The following jobs failed: ${failedJobs}
-          
+
           [View workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
-          
+
           await github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,

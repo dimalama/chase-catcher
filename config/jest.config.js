@@ -2,14 +2,16 @@ module.exports = {
   testEnvironment: 'jsdom',
   roots: ['../src'],
   testMatch: [
-    '**/__tests__/**/*.js',
-    '**/?(*.)+(spec|test).js'
+    '**/__tests__/**/*.ts',
+    '**/?(*.)+(spec|test).ts'
   ],
   setupFilesAfterEnv: ['../config/jest.setup.js'],
   collectCoverageFrom: [
-    'src/**/*.js',
-    '!src/**/*.test.js',
-    '!src/**/__tests__/**'
+    '../src/**/*.ts',
+    '!../src/**/*.test.ts',
+    '!../src/**/__tests__/**',
+    '!../src/__mocks__/**',
+    '!../src/js/types.ts'
   ],
   coverageDirectory: '../coverage',
   coverageReporters: ['text', 'lcov', 'json', 'html'],
@@ -30,9 +32,10 @@ module.exports = {
     '/dist/'
   ],
   transform: {
-    '^.+\\.js$': ['babel-jest', { rootMode: 'upward' }]
+    '^.+\\.[jt]s$': ['babel-jest', { rootMode: 'upward' }]
   },
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1'
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^webextension-polyfill$': '<rootDir>/src/__mocks__/webextension-polyfill.ts'
   }
 };

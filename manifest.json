@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Chase Catcher",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Automatically activate Chase credit card offers with a single click",
   "author": "Dima Lukianenko",
   "homepage_url": "https://github.com/dimalama/chase-catcher",
@@ -19,13 +19,15 @@
     }
   },
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage",
+    "notifications"
   ],
   "host_permissions": [
     "https://secure.chase.com/*"
   ],
   "background": {
-    "service_worker": "src/js/background.js"
+    "service_worker": "dist/background.js"
   },
   "content_scripts": [
     {
@@ -33,10 +35,32 @@
         "https://secure.chase.com/*"
       ],
       "js": [
-        "src/js/content.js"
+        "dist/content.js"
       ]
     }
   ],
-  "minimum_chrome_version": "88",
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "MacCtrl+Shift+Y"
+      },
+      "description": "Open ChaseCatcher popup"
+    },
+    "toggle-hunting": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+H",
+        "mac": "MacCtrl+Shift+H"
+      },
+      "description": "Start or stop offer hunting"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "chase-catcher@dimalama",
+      "strict_min_version": "109.0"
+    }
+  },
+  "minimum_chrome_version": "109",
   "short_name": "ChaseCatcher"
 }
