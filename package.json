@@ -30,7 +30,7 @@
   "author": "Dima Lukianenko",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.22.0",
+    "@babel/core": "^7.29.6",
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-typescript": "^7.28.5",
     "@types/chrome": "^0.1.39",
