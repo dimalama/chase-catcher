@@ -18,9 +18,7 @@ const SINGLE_OFFER_HTML = `
 
 // Capture the message listener registered when content.ts is first imported.
 // Must happen in beforeAll, before jest.clearAllMocks() wipes the call record.
-let contentMessageListener: (
-  msg: unknown
-) => Promise<{ success: boolean; isRunning?: boolean }>;
+let contentMessageListener: (msg: unknown) => Promise<{ success: boolean; isRunning?: boolean }>;
 
 beforeAll(() => {
   const addListenerMock = browser.runtime.onMessage.addListener as jest.Mock;
@@ -54,7 +52,10 @@ describe('full single-offer activation flow', () => {
     }
 
     const sendMessageMock = browser.runtime.sendMessage as jest.Mock;
-    const calls = sendMessageMock.mock.calls.map((c: unknown[]) => c[0]) as Array<{ action: string; [key: string]: unknown }>;
+    const calls = sendMessageMock.mock.calls.map((c: unknown[]) => c[0]) as Array<{
+      action: string;
+      [key: string]: unknown;
+    }>;
 
     const progressMsg = calls.find(c => c.action === 'updateProgress');
     const completeMsg = calls.find(c => c.action === 'huntingComplete');

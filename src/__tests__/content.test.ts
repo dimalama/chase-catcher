@@ -6,16 +6,11 @@ import {
   getRandomDelay,
   refreshUnprocessedOffers,
   waitForOfferConfirmation,
-  resetState
+  resetState,
 } from '../js/content';
 
 // Offer tile DOM helper
-const makeOfferTile = (
-  id: string,
-  ariaLabel: string,
-  buttonType: string,
-  buttonText = 'Add'
-) => `
+const makeOfferTile = (id: string, ariaLabel: string, buttonType: string, buttonText = 'Add') => `
   <div data-cy="commerce-tile" id="${id}" aria-label="${ariaLabel}">
     <button data-cy="commerce-tile-button" type="${buttonType}">${buttonText}</button>
     <span class="mds-body-small-heavier semanticColorTextRegular">Test Merchant</span>
@@ -243,4 +238,3 @@ describe('waitForOfferConfirmation', () => {
     jest.useRealTimers();
   });
 });
-

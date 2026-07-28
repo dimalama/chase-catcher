@@ -4,10 +4,7 @@ export type ContentToPopupMessage =
   | { action: 'error'; error: string };
 
 export type PopupToContentMessage =
-  | { action: 'startHunting' }
-  | { action: 'stopHunting' }
-  | { action: 'getStatus' };
+  { action: 'startHunting' } | { action: 'stopHunting' } | { action: 'getStatus' };
 
 export type ContentMessageResponse =
-  | { success: true; isRunning?: boolean }
-  | { success: false; error: string };
+  { success: true; isRunning?: boolean } | { success: false; error: string };
