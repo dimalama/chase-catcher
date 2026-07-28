@@ -30,7 +30,7 @@ chase-catcher/
 │   ├── webpack.config.js  # Webpack build configuration
 │   ├── jest.config.js     # Jest test configuration
 │   ├── jest.setup.js      # Jest setup file
-│   ├── .eslintrc.json     # ESLint rules
+│   ├── eslint.config.mjs  # ESLint flat config
 │   └── .prettierrc        # Prettier formatting rules
 └── dist/                  # Build output (generated)
 ```

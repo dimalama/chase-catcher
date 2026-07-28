@@ -1,0 +1,51 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    # Everything here is build tooling, so batch routine bumps into a single PR
+    # instead of one per package. Security updates are opened separately by
+    # Dependabot regardless of this grouping.
+    groups:
+      babel:
+        patterns:
+          - '@babel/*'
+          - babel-jest
+          - babel-loader
+      jest:
+        patterns:
+          - jest
+          - jest-*
+          - '@types/jest'
+      eslint:
+        patterns:
+          - eslint
+          - '@eslint/*'
+          - '@typescript-eslint/*'
+          - globals
+      webpack:
+        patterns:
+          - webpack
+          - webpack-cli
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns:
+          - '*'
