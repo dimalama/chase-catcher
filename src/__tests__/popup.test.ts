@@ -21,7 +21,7 @@ const buildPopupDom = () => {
     progressBar: document.getElementById('progressBar'),
     progressFill: document.getElementById('progressFill'),
     offerCount: document.getElementById('offerCount'),
-    statsDisplay: document.getElementById('statsDisplay')
+    statsDisplay: document.getElementById('statsDisplay'),
   };
 };
 
@@ -56,7 +56,7 @@ describe('initial state', () => {
   it('should load stats from storage on open', async () => {
     const deps = buildPopupDom();
     (browser.storage.local.get as jest.Mock).mockResolvedValue({
-      stats: { allTimeCount: 42, lastRunDate: '2025-01-01', lastRunCount: 5 }
+      stats: { allTimeCount: 42, lastRunDate: '2025-01-01', lastRunCount: 5 },
     });
 
     initPopup(deps);
@@ -67,9 +67,7 @@ describe('initial state', () => {
 
   it('should show error when not on chase.com', async () => {
     const deps = buildPopupDom();
-    (browser.tabs.query as jest.Mock).mockResolvedValue([
-      { id: 1, url: 'https://example.com' }
-    ]);
+    (browser.tabs.query as jest.Mock).mockResolvedValue([{ id: 1, url: 'https://example.com' }]);
 
     initPopup(deps);
     await Promise.resolve(); // flush status check
@@ -83,7 +81,7 @@ describe('start button click', () => {
   it('should send startHunting message and update UI on success', async () => {
     const deps = buildPopupDom();
     (browser.tabs.query as jest.Mock).mockResolvedValue([
-      { id: 1, url: 'https://secure.chase.com/offers' }
+      { id: 1, url: 'https://secure.chase.com/offers' },
     ]);
     (browser.tabs.sendMessage as jest.Mock).mockResolvedValue({ success: true });
 
@@ -102,9 +100,7 @@ describe('start button click', () => {
 
   it('should show error for non-chase URL', async () => {
     const deps = buildPopupDom();
-    (browser.tabs.query as jest.Mock).mockResolvedValue([
-      { id: 1, url: 'https://example.com' }
-    ]);
+    (browser.tabs.query as jest.Mock).mockResolvedValue([{ id: 1, url: 'https://example.com' }]);
 
     initPopup(deps);
     deps.startBtn.click();
@@ -117,7 +113,7 @@ describe('start button click', () => {
   it('should show error when response has error field', async () => {
     const deps = buildPopupDom();
     (browser.tabs.query as jest.Mock).mockResolvedValue([
-      { id: 1, url: 'https://secure.chase.com/offers' }
+      { id: 1, url: 'https://secure.chase.com/offers' },
     ]);
     (browser.tabs.sendMessage as jest.Mock).mockResolvedValue({ error: 'Wrong page' });
 
@@ -132,7 +128,7 @@ describe('start button click', () => {
   it('should show error when sendMessage throws', async () => {
     const deps = buildPopupDom();
     (browser.tabs.query as jest.Mock).mockResolvedValue([
-      { id: 1, url: 'https://secure.chase.com/offers' }
+      { id: 1, url: 'https://secure.chase.com/offers' },
     ]);
     (browser.tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('Connection refused'));
 
@@ -141,9 +137,7 @@ describe('start button click', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(deps.statusDiv.textContent).toBe(
-      '❌ Error: Please refresh the page and try again'
-    );
+    expect(deps.statusDiv.textContent).toBe('❌ Error: Please refresh the page and try again');
   });
 });
 
@@ -151,7 +145,7 @@ describe('stop button click', () => {
   it('should send stopHunting and reset UI', async () => {
     const deps = buildPopupDom();
     (browser.tabs.query as jest.Mock).mockResolvedValue([
-      { id: 1, url: 'https://secure.chase.com/offers' }
+      { id: 1, url: 'https://secure.chase.com/offers' },
     ]);
     (browser.tabs.sendMessage as jest.Mock).mockResolvedValue({ success: true });
 
@@ -176,7 +170,7 @@ describe('message listener', () => {
       action: 'updateProgress',
       current: 3,
       total: 10,
-      progress: 30
+      progress: 30,
     });
 
     expect(deps.progressFill!.style.width).toBe('30%');

@@ -9,7 +9,7 @@ const config = {
     daysLeft: '[data-testid="days-left-banner"]',
     merchantName: '.mds-body-small-heavier[class*="semanticColorTextRegular"]',
     cashbackAmount: '.mds-body-large-heavier[class*="semanticColorTextRegular"]',
-    offerButtonContainer: '[data-cy="offer-tile-alert-container-success"], [class^="r9j"]'
+    offerButtonContainer: '[data-cy="offer-tile-alert-container-success"], [class^="r9j"]',
   },
   delays: {
     afterClick: 1500,
@@ -20,8 +20,8 @@ const config = {
     scrollSettle: 400,
     confirmationTimeout: 5000,
     detailPageTimeout: 4000,
-    backNavigationTimeout: 5000
-  }
+    backNavigationTimeout: 5000,
+  },
 };
 
 // Global state tracking
@@ -190,9 +190,7 @@ export const waitForOfferConfirmation = (
 /**
  * Detects if Chase navigated to the offer detail page (SPA route change).
  */
-const waitForDetailPage = async (
-  maxWait = config.delays.detailPageTimeout
-): Promise<boolean> => {
+const waitForDetailPage = async (maxWait = config.delays.detailPageTimeout): Promise<boolean> => {
   const start = Date.now();
   while (Date.now() - start < maxWait) {
     if (
@@ -228,7 +226,7 @@ const notifyComplete = (): void => {
   const msg: ContentToPopupMessage = {
     action: 'huntingComplete',
     success: true,
-    count: activatedCount
+    count: activatedCount,
   };
   browser.runtime.sendMessage(msg).catch(() => {});
 };
@@ -251,7 +249,7 @@ const processNextOffer = async (): Promise<void> => {
   try {
     const pageReady = await Promise.race([
       waitForPage(),
-      new Promise<boolean>(resolve => setTimeout(() => resolve(false), config.delays.minDelay))
+      new Promise<boolean>(resolve => setTimeout(() => resolve(false), config.delays.minDelay)),
     ]);
 
     if (!pageReady) {
@@ -281,10 +279,8 @@ const processNextOffer = async (): Promise<void> => {
 
     const merchant =
       nextOffer.querySelector(config.selectors.merchantName)?.textContent ?? 'Unknown';
-    const cashback =
-      nextOffer.querySelector(config.selectors.cashbackAmount)?.textContent ?? '';
-    const daysLeft =
-      nextOffer.querySelector(config.selectors.daysLeft)?.textContent ?? '';
+    const cashback = nextOffer.querySelector(config.selectors.cashbackAmount)?.textContent ?? '';
+    const daysLeft = nextOffer.querySelector(config.selectors.daysLeft)?.textContent ?? '';
 
     // Click the tile — Chase navigates to detail page and adds the offer
     (nextOffer as HTMLElement).click();
@@ -311,7 +307,7 @@ const processNextOffer = async (): Promise<void> => {
         action: 'updateProgress',
         current: activatedCount,
         total: totalOffers,
-        progress
+        progress,
       };
       browser.runtime.sendMessage(msg).catch(() => {});
     } else {

@@ -45,7 +45,9 @@ describe('isChaseUrl', () => {
   });
 
   it('should return true for creditcards.chase.com', () => {
-    expect(isChaseUrl('https://creditcards.chase.com/rewards-credit-cards/rewards/offers')).toBe(true);
+    expect(isChaseUrl('https://creditcards.chase.com/rewards-credit-cards/rewards/offers')).toBe(
+      true
+    );
   });
 
   it('should return false for non-HTTPS chase URL', () => {

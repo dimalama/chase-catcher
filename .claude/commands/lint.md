@@ -10,4 +10,4 @@ Steps:
 3. If there are fixable issues, ask if you should run `npm run lint:fix` to auto-fix them
 4. Report the results to the user
 
-The ESLint configuration is located in config/.eslintrc.json and enforces consistent code style throughout the project.
+The ESLint configuration is located in config/eslint.config.mjs and enforces consistent code style throughout the project.

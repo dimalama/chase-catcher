@@ -3,7 +3,7 @@
 ## Project-Specific Guidelines
 
 ### Code Style
-- Follow the existing ESLint configuration in config/.eslintrc.json
+- Follow the existing ESLint configuration in config/eslint.config.mjs
 - Use single quotes for strings (except when double quotes are enclosed in single quotes)
 - Format code with Prettier before committing
 - Maintain consistent indentation and spacing

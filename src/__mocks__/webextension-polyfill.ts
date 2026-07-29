@@ -6,30 +6,30 @@ const browser = {
     sendMessage: jest.fn().mockResolvedValue({}),
     onMessage: {
       addListener: jest.fn(),
-      removeListener: jest.fn()
+      removeListener: jest.fn(),
     },
     onInstalled: {
-      addListener: jest.fn()
-    }
+      addListener: jest.fn(),
+    },
   },
   tabs: {
     query: jest.fn().mockResolvedValue([]),
-    sendMessage: jest.fn().mockResolvedValue({})
+    sendMessage: jest.fn().mockResolvedValue({}),
   },
   commands: {
     onCommand: {
-      addListener: jest.fn()
-    }
+      addListener: jest.fn(),
+    },
   },
   notifications: {
-    create: jest.fn().mockResolvedValue(undefined)
+    create: jest.fn().mockResolvedValue(undefined),
   },
   storage: {
     local: {
       get: jest.fn().mockResolvedValue({}),
-      set: jest.fn().mockResolvedValue(undefined)
-    }
-  }
+      set: jest.fn().mockResolvedValue(undefined),
+    },
+  },
 };
 
 export default browser;

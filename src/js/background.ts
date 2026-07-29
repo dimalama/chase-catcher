@@ -10,13 +10,12 @@ browser.commands.onCommand.addListener(async (command: string) => {
   if (command !== 'toggle-hunting') return;
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) return;
-  const raw = await browser.tabs.sendMessage(
-    tab.id,
-    { action: 'getStatus' } as PopupToContentMessage
-  );
+  const raw = await browser.tabs.sendMessage(tab.id, {
+    action: 'getStatus',
+  } as PopupToContentMessage);
   const status = raw as Record<string, unknown>;
   await browser.tabs.sendMessage(tab.id, {
-    action: status.isRunning ? 'stopHunting' : 'startHunting'
+    action: status.isRunning ? 'stopHunting' : 'startHunting',
   } as PopupToContentMessage);
 });
 
@@ -28,7 +27,7 @@ browser.runtime.onMessage.addListener((message: unknown) => {
       type: 'basic',
       iconUrl: browser.runtime.getURL('public/icons/icon48.png'),
       title: 'ChaseCatcher',
-      message: `✨ Activated ${msg.count} offers!`
+      message: `✨ Activated ${msg.count} offers!`,
     });
   }
 });

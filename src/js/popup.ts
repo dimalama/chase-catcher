@@ -17,15 +17,10 @@ interface PopupDeps {
   statsDisplay: HTMLElement | null;
 }
 
-const updateUI = (
-  running: boolean,
-  deps: PopupDeps
-): void => {
+const updateUI = (running: boolean, deps: PopupDeps): void => {
   deps.startBtn.style.display = running ? 'none' : 'block';
   deps.stopBtn.style.display = running ? 'block' : 'none';
-  deps.statusDiv.textContent = running
-    ? '🎯 Catching rewards...'
-    : 'Ready to catch some rewards!';
+  deps.statusDiv.textContent = running ? '🎯 Catching rewards...' : 'Ready to catch some rewards!';
   if (deps.progressBar) {
     deps.progressBar.style.display = running ? 'block' : 'none';
   }
@@ -45,12 +40,12 @@ const saveStats = async (count: number): Promise<void> => {
   const existing = (result.stats as StoredStats | undefined) ?? {
     allTimeCount: 0,
     lastRunDate: '',
-    lastRunCount: 0
+    lastRunCount: 0,
   };
   const updated: StoredStats = {
     allTimeCount: existing.allTimeCount + count,
     lastRunDate: new Date().toISOString(),
-    lastRunCount: count
+    lastRunCount: count,
   };
   await browser.storage.local.set({ stats: updated });
 };
@@ -72,10 +67,9 @@ export const initPopup = (deps: PopupDeps): void => {
     }
 
     try {
-      const raw = await browser.tabs.sendMessage(
-        tabs[0].id!,
-        { action: 'startHunting' } as PopupToContentMessage
-      );
+      const raw = await browser.tabs.sendMessage(tabs[0].id!, {
+        action: 'startHunting',
+      } as PopupToContentMessage);
       const response = raw as Record<string, unknown>;
       if (response?.error) {
         statusDiv.textContent = '❌ Error: Please navigate to the Chase offers page';
@@ -94,10 +88,9 @@ export const initPopup = (deps: PopupDeps): void => {
     if (!tabs[0]) return;
 
     try {
-      const raw = await browser.tabs.sendMessage(
-        tabs[0].id!,
-        { action: 'stopHunting' } as PopupToContentMessage
-      );
+      const raw = await browser.tabs.sendMessage(tabs[0].id!, {
+        action: 'stopHunting',
+      } as PopupToContentMessage);
       const response = raw as Record<string, unknown>;
       if (response?.success) {
         updateUI(false, deps);
