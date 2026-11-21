@@ -55,7 +55,7 @@ npm run build
 2. Click "Load Temporary Add-on…" and select `build/firefox/manifest.json`
 3. If Firefox asks for access to `secure.chase.com`, allow it. If you skipped it, click **Start Catching** in the popup and approve the prompt, then reload the Chase page.
 
-Temporary add-ons are removed when Firefox restarts. For a permanent install, submit `chase-catcher-firefox.zip` (from `npm run package`) to [addons.mozilla.org](https://addons.mozilla.org/developers/), either listed or self-distributed (signed but unlisted).
+Temporary add-ons are removed when Firefox restarts. For a permanent install, publish it to addons.mozilla.org: see [PUBLISHING.md](PUBLISHING.md).
 
 ### Safari (macOS, iPhone, iPad)
 Safari extensions must ship inside a native app, so this step needs a Mac with Xcode.
@@ -66,7 +66,7 @@ Safari extensions must ship inside a native app, so this step needs a Mac with X
 4. **iPhone / iPad:** connect the device, select the iOS scheme and run it. Then on the device open *Settings → Apps → Safari → Extensions*, enable Chase Catcher, and set *secure.chase.com* to **Allow**.
 5. In Safari, open the Chase offers page, tap the **ᴀA** (or puzzle) icon in the address bar, and choose Chase Catcher.
 
-A free Apple ID can install on your own devices, but the app expires after 7 days. Publishing to the App Store needs a paid Apple Developer account.
+A free Apple ID can install on your own devices, but the app expires after 7 days. To publish on the App Store (no Mac required with Apple's web packager), see [PUBLISHING.md](PUBLISHING.md).
 
 ## 💻 Usage
 
@@ -85,6 +85,7 @@ Keyboard shortcuts (desktop only): `Ctrl+Shift+Y` opens the popup, `Ctrl+Shift+H
 - No external communication
 - Open source for transparency
 - Stores only a local offer counter and your disclaimer acceptance
+- [Privacy Policy](PRIVACY.md)
 
 ## 🛠️ Development
 
@@ -99,6 +100,7 @@ Keyboard shortcuts (desktop only): `Ctrl+Shift+Y` opens the popup, `Ctrl+Shift+H
 - `npm run typecheck` — TypeScript type checking
 - `npm run lint` — Lint source files
 - `npm run package` — Build and create `chase-catcher-{chrome,firefox,safari}.zip` for store submission
+- `npm run package:source` — Zip the source (last commit) for Mozilla review
 - `npm run lint:firefox` — Validate the Firefox build with Mozilla's `web-ext lint`
 - `npm run safari:xcode` — (macOS) Generate the Safari Xcode project from `build/safari`
 
@@ -107,6 +109,8 @@ Keyboard shortcuts (desktop only): `Ctrl+Shift+Y` opens the popup, `Ctrl+Shift+H
 chase-catcher/
 ├── manifest.json          # Shared MV3 manifest (per-browser variants are generated)
 ├── DISCLAIMER.md          # Terms of use and liability disclaimer
+├── PRIVACY.md             # Privacy policy (store listings link here)
+├── PUBLISHING.md          # How to publish to Firefox, Apple, and Chrome stores
 ├── public/
 │   ├── popup.html         # Extension popup UI
 │   └── icons/             # Extension icons (16, 48, 128)

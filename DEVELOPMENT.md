@@ -64,9 +64,6 @@ All code talks to the browser through `webextension-polyfill` (`browser.*`), whi
 - When you change the disclaimer text materially, bump `DISCLAIMER_VERSION` in `src/utils/disclaimer.ts`
   so users re-accept.
 
-## Release checklist
-- [ ] Bump `version` in `manifest.json` and `package.json`
-- [ ] `npm run package` and smoke-test each zip
-- [ ] Chrome Web Store: upload `chase-catcher-chrome.zip`
-- [ ] Firefox AMO: upload `chase-catcher-firefox.zip`
-- [ ] Safari: `npm run safari:xcode`, archive in Xcode, upload to App Store Connect
+## Releasing
+See [PUBLISHING.md](PUBLISHING.md) for step-by-step store submission (Firefox, Apple, Chrome)
+and the per-release checklist.

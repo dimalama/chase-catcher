@@ -15,6 +15,7 @@
     "format:check": "prettier --config config/.prettierrc --check src/",
     "clean": "rm -rf dist/ build/ coverage/ package/ chase-catcher*.zip",
     "package": "npm run clean && webpack --config config/webpack.config.js && node config/build-targets.js --zip",
+    "package:source": "git archive --format=zip -o chase-catcher-source.zip HEAD && echo \"Source archive (last commit) created at chase-catcher-source.zip\"",
     "lint:firefox": "npx --yes web-ext lint --source-dir build/firefox",
     "safari:xcode": "xcrun safari-web-extension-converter build/safari --project-location safari-xcode --app-name \"Chase Catcher\" --bundle-identifier com.dimalama.chasecatcher --swift --copy-resources --no-open --no-prompt --force"
   },
