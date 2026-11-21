@@ -1,10 +1,10 @@
 {
   "name": "chase-catcher",
   "version": "2.0.0",
-  "description": "Chrome extension to automatically activate Chase credit card offers",
+  "description": "Browser extension (Chrome, Firefox, Safari) to automatically activate Chase credit card offers",
   "main": "src/js/background.ts",
   "scripts": {
-    "build": "webpack --config config/webpack.config.js",
+    "build": "webpack --config config/webpack.config.js && node config/build-targets.js",
     "watch": "webpack --watch --config config/webpack.config.js",
     "test": "jest --config config/jest.config.js --ci --coverage --passWithNoTests",
     "test:watch": "jest --watch --config config/jest.config.js",
@@ -13,8 +13,10 @@
     "lint:fix": "eslint --config config/eslint.config.mjs src/ --fix",
     "format": "prettier --config config/.prettierrc --write src/",
     "format:check": "prettier --config config/.prettierrc --check src/",
-    "clean": "rm -rf dist/ coverage/ package/",
-    "package": "npm run clean && rm -f chase-catcher.zip && npm run build && mkdir -p package && cp manifest.json package/ && cp -r public package/ && cp -r dist package/ && cd package && zip -r ../chase-catcher.zip * && cd .. && echo 'Package created at chase-catcher.zip'"
+    "clean": "rm -rf dist/ build/ coverage/ package/ chase-catcher*.zip",
+    "package": "npm run clean && webpack --config config/webpack.config.js && node config/build-targets.js --zip",
+    "lint:firefox": "npx --yes web-ext lint --source-dir build/firefox",
+    "safari:xcode": "xcrun safari-web-extension-converter build/safari --project-location safari-xcode --app-name \"Chase Catcher\" --bundle-identifier com.dimalama.chasecatcher --swift --copy-resources --no-open --no-prompt --force"
   },
   "repository": {
     "type": "git",
@@ -22,6 +24,9 @@
   },
   "keywords": [
     "chrome-extension",
+    "firefox-addon",
+    "safari-web-extension",
+    "webextension",
     "chase",
     "credit-card",
     "rewards",

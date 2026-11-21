@@ -11,6 +11,11 @@ const browser = {
     onInstalled: {
       addListener: jest.fn(),
     },
+    getURL: jest.fn((path: string) => `moz-extension://test/${path}`),
+  },
+  permissions: {
+    contains: jest.fn().mockResolvedValue(true),
+    request: jest.fn().mockResolvedValue(true),
   },
   tabs: {
     query: jest.fn().mockResolvedValue([]),

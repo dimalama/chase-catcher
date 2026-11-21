@@ -1,5 +1,12 @@
 import browser from 'webextension-polyfill';
 import type { ContentToPopupMessage, PopupToContentMessage } from './types';
+import { isChaseUrl } from '../utils/url';
+import { acceptDisclaimer, hasAcceptedDisclaimer } from '../utils/disclaimer';
+import { hasHostAccess, requestHostAccess } from '../utils/permissions';
+
+const MSG_WRONG_PAGE = '❌ Error: Please open Chase offers page';
+const MSG_NO_ACCESS =
+  '🔒 Chase Catcher needs access to secure.chase.com. Click Start and allow access, then reload the Chase page.';
 
 interface StoredStats {
   allTimeCount: number;
@@ -15,6 +22,10 @@ interface PopupDeps {
   progressFill: HTMLElement | null;
   offerCount: HTMLElement | null;
   statsDisplay: HTMLElement | null;
+  // Disclaimer gate. When omitted (unit tests), the gate is skipped.
+  disclaimerPanel?: HTMLElement | null;
+  mainPanel?: HTMLElement | null;
+  acceptBtn?: HTMLButtonElement | null;
 }
 
 const updateUI = (running: boolean, deps: PopupDeps): void => {
@@ -51,23 +62,58 @@ const saveStats = async (count: number): Promise<void> => {
 };
 
 /**
+ * Shows the disclaimer until the user accepts it, then the main controls.
+ * Resolves to whether the disclaimer is accepted.
+ */
+const initDisclaimerGate = async (deps: PopupDeps): Promise<boolean> => {
+  const { disclaimerPanel, mainPanel, acceptBtn } = deps;
+  if (!disclaimerPanel || !mainPanel || !acceptBtn) return true;
+
+  const show = (accepted: boolean): void => {
+    disclaimerPanel.hidden = accepted;
+    mainPanel.hidden = !accepted;
+  };
+
+  const accepted = await hasAcceptedDisclaimer();
+  show(accepted);
+  if (accepted) return true;
+
+  return new Promise(resolve => {
+    acceptBtn.addEventListener('click', () => {
+      acceptDisclaimer()
+        .catch(() => {})
+        .then(() => {
+          show(true);
+          resolve(true);
+        });
+    });
+  });
+};
+
+/**
  * Initialises the popup with injected DOM dependencies.
  * Exported for unit tests via dependency injection.
  */
 export const initPopup = (deps: PopupDeps): void => {
   const { startBtn, stopBtn, statusDiv, progressFill, offerCount, statsDisplay } = deps;
 
+  const gated = Boolean(deps.disclaimerPanel && deps.mainPanel && deps.acceptBtn);
+  let accepted = !gated;
+  let hostAccess = true;
+
   loadStats(statsDisplay);
 
-  startBtn.addEventListener('click', async () => {
-    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-    if (!tabs[0]?.url?.includes('chase.com')) {
-      statusDiv.textContent = '❌ Error: Please open Chase offers page';
+  const startHunting = async (): Promise<void> => {
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+    // Safari leaves tab.url undefined when the extension lacks access to the
+    // site, so only reject URLs we can actually see.
+    if (!tab?.id || (tab.url !== undefined && !isChaseUrl(tab.url))) {
+      statusDiv.textContent = MSG_WRONG_PAGE;
       return;
     }
 
     try {
-      const raw = await browser.tabs.sendMessage(tabs[0].id!, {
+      const raw = await browser.tabs.sendMessage(tab.id, {
         action: 'startHunting',
       } as PopupToContentMessage);
       const response = raw as Record<string, unknown>;
@@ -81,6 +127,21 @@ export const initPopup = (deps: PopupDeps): void => {
     } catch {
       statusDiv.textContent = '❌ Error: Please refresh the page and try again';
     }
+  };
+
+  startBtn.addEventListener('click', () => {
+    if (!accepted) return;
+    // Request site access synchronously, before any await: Firefox only shows
+    // the prompt while the click's user gesture is still active.
+    const access = hostAccess ? Promise.resolve(true) : requestHostAccess();
+    access.then(granted => {
+      if (!granted) {
+        statusDiv.textContent = MSG_NO_ACCESS;
+        return;
+      }
+      hostAccess = true;
+      return startHunting();
+    });
   });
 
   stopBtn.addEventListener('click', async () => {
@@ -126,16 +187,31 @@ export const initPopup = (deps: PopupDeps): void => {
     }
   });
 
-  // Check current status when popup opens
-  browser.tabs
-    .query({ active: true, currentWindow: true })
+  if (gated) {
+    initDisclaimerGate(deps).then(ok => {
+      accepted = ok;
+    });
+  }
+
+  // Check site access and current status when popup opens
+  hasHostAccess()
+    .then(granted => {
+      hostAccess = granted;
+      return browser.tabs.query({ active: true, currentWindow: true });
+    })
     .then((tabs: browser.Tabs.Tab[]) => {
-      if (!tabs[0]?.url?.includes('chase.com')) {
-        statusDiv.textContent = '❌ Error: Please open Chase offers page';
+      const tab = tabs[0];
+      if (tab?.url !== undefined && !isChaseUrl(tab.url)) {
+        statusDiv.textContent = MSG_WRONG_PAGE;
         return;
       }
+      if (!hostAccess) {
+        statusDiv.textContent = MSG_NO_ACCESS;
+        return;
+      }
+      if (!tab?.id) return;
       return browser.tabs
-        .sendMessage(tabs[0].id!, { action: 'getStatus' } as PopupToContentMessage)
+        .sendMessage(tab.id, { action: 'getStatus' } as PopupToContentMessage)
         .then((raw: unknown) => {
           const response = raw as Record<string, unknown>;
           if (response && typeof response.isRunning === 'boolean') {
@@ -155,5 +231,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const offerCount = document.getElementById('offerCount');
   const statsDisplay = document.getElementById('statsDisplay');
 
-  initPopup({ startBtn, stopBtn, statusDiv, progressBar, progressFill, offerCount, statsDisplay });
+  const disclaimerPanel = document.getElementById('disclaimer');
+  const mainPanel = document.getElementById('main');
+  const acceptBtn = document.getElementById('acceptBtn') as HTMLButtonElement | null;
+
+  initPopup({
+    startBtn,
+    stopBtn,
+    statusDiv,
+    progressBar,
+    progressFill,
+    offerCount,
+    statsDisplay,
+    disclaimerPanel,
+    mainPanel,
+    acceptBtn,
+  });
 });

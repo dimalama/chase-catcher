@@ -1,7 +1,7 @@
 # ChaseCatcher - Project Context
 
 ## Overview
-ChaseCatcher is a Chrome extension (Manifest V3) that automatically activates Chase credit card offers with a single click. It helps users save time and never miss cashback opportunities.
+ChaseCatcher is a cross-browser extension (Manifest V3: Chrome, Firefox, Safari) that automatically activates Chase credit card offers with a single click. It helps users save time and never miss cashback opportunities.
 
 ## Tech Stack
 - **Platform**: Chrome Extension (Manifest V3)
