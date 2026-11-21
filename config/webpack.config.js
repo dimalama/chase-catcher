@@ -19,11 +19,10 @@ module.exports = {
       {
         test: /\.[jt]s$/,
         exclude: /node_modules/,
+        // Options come from the root babel.config.js
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env', '@babel/preset-typescript']
-          }
+          options: { rootMode: 'upward' }
         }
       }
     ]

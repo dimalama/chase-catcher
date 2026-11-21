@@ -81,24 +81,8 @@ jobs:
       run: npm run lint
     - name: Check formatting
       run: npm run format:check
-    - name: Report Lint Results
-      if: always()
-      uses: actions/github-script@v9
-      with:
-        script: |
-          const results = process.env.LINT_RESULTS
-          if (results) {
-            const issues = JSON.parse(results)
-            const body = issues.map(issue =>
-              `- ${issue.filePath}:${issue.line} - ${issue.message}`
-            ).join('\n')
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `### Lint Issues Found\n${body}`
-            })
-          }
+    - name: Type check
+      run: npm run typecheck
 
   test:
     runs-on: ubuntu-latest
@@ -242,7 +226,8 @@ jobs:
 
   notify:
     needs: [build]
-    if: always()
+    # Only PRs have an issue number to comment on
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7

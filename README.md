@@ -89,7 +89,7 @@ Keyboard shortcuts (desktop only): `Ctrl+Shift+Y` opens the popup, `Ctrl+Shift+H
 ## 🛠️ Development
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 22.18+ (or 24.11+)
 - npm
 
 ### Available Scripts
