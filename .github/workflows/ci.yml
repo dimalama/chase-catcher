@@ -122,6 +122,9 @@ jobs:
         path: coverage/junit.xml
         reporter: jest-junit
         fail-on-error: true
+        # v3 defaults to writing only the job summary; create the "Jest Tests"
+        # check run so branch protection that requires it gets a result.
+        use-actions-summary: false
 
   security:
     runs-on: ubuntu-latest
