@@ -1,166 +1,69 @@
 # ChaseCatcher Development Guide
 
-## 🚀 Getting Started
+## Prerequisites
+- Node.js 22.18+ or 24.11+ (required by Babel 8)
+- npm
+- At least one of: Chrome/Chromium, Firefox 128+, or a Mac with Xcode for Safari
 
-### Prerequisites
-- Node.js (v16 or higher)
-- npm (v7 or higher)
-- Google Chrome
-
-### Initial Setup
-1. Clone the repository:
+## Setup
 ```bash
 git clone https://github.com/dimalama/chase-catcher.git
 cd chase-catcher
-```
-
-2. Install dependencies:
-```bash
 npm install
+npm run build
 ```
 
-3. Start development mode:
-```bash
-npm run dev
+## How the build works
 ```
-
-## 🛠️ Development Workflow
-
-### Directory Structure
+src/**/*.ts ──webpack + Babel──▶ dist/{background,content,popup}.js
+manifest.json + dist/ + public/ ──config/build-targets.js──▶ build/chrome
+                                                              build/firefox
+                                                              build/safari
 ```
-chase-catcher/
-├── __tests__/           # Test files
-├── .github/             # GitHub configuration
-├── scripts/             # Build and utility scripts
-├── store_assets/        # Chrome Web Store assets
-├── src/                 # Source code
-│   ├── content.js       # Content script
-│   ├── popup.js        # Popup script
-│   └── background.js   # Background script
-└── dist/               # Build output
-```
+There is one shared `manifest.json`. `config/build-targets.js` adjusts it per browser:
 
-### Available Scripts
-- `npm run dev`: Start development mode with hot reload
-- `npm run build`: Build for production
-- `npm test`: Run tests
-- `npm run lint`: Check code style
-- `npm run format`: Format code with Prettier
+| Target | Background | Other changes |
+|---|---|---|
+| chrome | `service_worker` | drops Firefox-only `browser_specific_settings` |
+| firefox | `scripts` (event page) | drops `minimum_chrome_version` |
+| safari | `scripts`, `persistent: false` | drops `notifications` (unsupported) and browser-specific keys |
 
-### Testing
-We use Jest for testing. Tests are located in the `__tests__` directory.
+All code talks to the browser through `webextension-polyfill` (`browser.*`), which maps to native
+`browser` on Firefox and Safari and wraps `chrome` on Chromium. APIs missing on some platforms
+(`notifications` on Safari, `commands` on iOS/Android) are feature-checked before use.
 
-#### Running Tests
-- Run all tests: `npm test`
-- Run specific test: `npm test -- content.test.js`
-- Watch mode: `npm test -- --watch`
-- Coverage report: `npm test -- --coverage`
+## Scripts
+| Command | What it does |
+|---|---|
+| `npm run build` | Compile and write `build/<browser>/` |
+| `npm run watch` | Recompile `dist/` on change (rerun `node config/build-targets.js` to refresh `build/`) |
+| `npm test` | Jest unit + integration tests with coverage |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` / `lint:fix` | ESLint |
+| `npm run format` / `format:check` | Prettier |
+| `npm run lint:firefox` | Mozilla `web-ext lint` on `build/firefox` |
+| `npm run package` | Clean build + `chase-catcher-{chrome,firefox,safari}.zip` |
+| `npm run safari:xcode` | (macOS) Wrap `build/safari` in an Xcode project for macOS + iOS |
 
-### Code Style
-We use ESLint and Prettier to maintain code quality:
-- ESLint enforces code quality rules
-- Prettier ensures consistent formatting
-- Pre-commit hooks automatically format code
+## Loading the extension
+- **Chrome:** `chrome://extensions` → Developer mode → Load unpacked → `build/chrome`
+- **Firefox:** `about:debugging#/runtime/this-firefox` → Load Temporary Add-on → `build/firefox/manifest.json`
+- **Safari:** see the README's Safari section
 
-### Building for Production
-1. Update version in `manifest.json`
-2. Run `./scripts/build.sh`
-3. Find the packaged extension in `chasecatcher.zip`
+## Debugging
+- **Content script:** DevTools console on the Chase offers page
+- **Background:** Chrome: "service worker" link on the extension card. Firefox: "Inspect" in `about:debugging`. Safari: Develop menu → Web Extension Background Content
+- **Popup:** right-click the popup → Inspect (Chrome/Firefox); Develop menu in Safari
+- **iPhone/iPad:** connect the device, enable Web Inspector in Safari settings on the device, and use the Mac's Safari Develop menu
 
-## 🔍 Chrome Extension Development
+## Cross-browser gotchas
+- Firefox and Safari can withhold host access to `secure.chase.com`; the content script then never runs.
+  The popup detects this and requests access on the Start click. `permissions.request` must be called
+  before any `await` in a click handler or Firefox rejects it.
+- Safari hides `tab.url` when the extension lacks site access, so URL checks must tolerate `undefined`.
+- When you change the disclaimer text materially, bump `DISCLAIMER_VERSION` in `src/utils/disclaimer.ts`
+  so users re-accept.
 
-### Loading the Extension
-1. Open Chrome
-2. Go to `chrome://extensions/`
-3. Enable "Developer mode"
-4. Click "Load unpacked"
-5. Select the `dist` directory
-
-### Debugging
-- Use Chrome DevTools for debugging
-- Content script console: Inspect page elements
-- Background script console: Click "background page" in extension details
-- Popup console: Right-click popup and select "Inspect"
-
-### Common Issues
-1. **Popup Not Loading**
-   - Check manifest.json permissions
-   - Verify popup.html path
-   - Check console for errors
-
-2. **Content Script Not Running**
-   - Verify matches pattern in manifest.json
-   - Check if URL matches pattern
-   - Look for console errors
-
-3. **Build Errors**
-   - Clear dist directory
-   - Delete node_modules and reinstall
-   - Check webpack configuration
-
-## 📦 Release Process
-
-### Pre-release Checklist
-- [ ] Update version numbers
-- [ ] Run full test suite
-- [ ] Check bundle size
-- [ ] Test in incognito mode
-- [ ] Verify permissions
-- [ ] Update documentation
-
-### Creating a Release
-1. Create release branch
-2. Update version in files
-3. Run build script
-4. Test package locally
-5. Create GitHub release
-6. Submit to Chrome Web Store
-
-### Chrome Web Store Submission
-1. Prepare store assets
-2. Update screenshots
-3. Review privacy policy
-4. Submit for review
-5. Monitor review status
-
-## 🔐 Security Best Practices
-
-### Code Guidelines
-- Avoid inline scripts
-- Use strict CSP
-- Minimize permissions
-- Sanitize user input
-- Use HTTPS only
-
-### Data Handling
-- No sensitive data storage
-- Clear data on uninstall
-- Use secure communication
-- Follow privacy policy
-
-## 🤝 Contributing
-
-### Pull Request Process
-1. Fork repository
-2. Create feature branch
-3. Write tests
-4. Update documentation
-5. Submit PR
-
-### Code Review Guidelines
-- Follow style guide
-- Include tests
-- Update docs
-- Keep changes focused
-
-## 📚 Resources
-
-### Documentation
-- [Chrome Extension API](https://developer.chrome.com/docs/extensions/reference/)
-- [Jest Documentation](https://jestjs.io/docs/getting-started)
-- [Webpack Guide](https://webpack.js.org/guides/)
-
-### Tools
-- [Chrome Extensions Manager](chrome://extensions/)
-- [Chrome DevTools](https://developer.chrome.com/docs/devtools/)
-- [Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
+## Releasing
+See [PUBLISHING.md](PUBLISHING.md) for step-by-step store submission (Firefox, Apple, Chrome)
+and the per-release checklist.

@@ -99,3 +99,79 @@ describe('clean stop before any processing', () => {
     jest.useRealTimers();
   });
 });
+
+describe('detail-page flow (Chase SPA navigates to the offer on click)', () => {
+  const tileHtml = (added: boolean) => `
+    <div data-testid="offerTileGridContainer">
+      <div data-cy="commerce-tile" id="offer1"
+        aria-label="${added ? 'Success Added' : '1 of 1 Test Merchant 5% cashback Add Offer'}">
+        <button data-cy="commerce-tile-button" type="${added ? 'ico_checkmark_filled' : 'ico_add_circle'}">
+          ${added ? 'Added' : 'Add'}
+        </button>
+      </div>
+    </div>
+  `;
+
+  let clickHandler: ((e: Event) => void) | undefined;
+  let backSpy: jest.SpyInstance;
+
+  /**
+   * Clicking the tile swaps in `detailHtml`; history.back() restores the list,
+   * with the tile shown as added or not per `addedAfterBack`.
+   */
+  const simulateChase = (detailHtml: string, addedAfterBack: boolean) => {
+    document.body.innerHTML = tileHtml(false);
+    clickHandler = (e: Event) => {
+      if ((e.target as Element).closest('[data-cy="commerce-tile"]')) {
+        setTimeout(() => {
+          document.body.innerHTML = detailHtml;
+        }, 200);
+      }
+    };
+    document.addEventListener('click', clickHandler);
+    backSpy = jest.spyOn(window.history, 'back').mockImplementation(() => {
+      setTimeout(() => {
+        document.body.innerHTML = tileHtml(addedAfterBack);
+      }, 200);
+    });
+  };
+
+  const runHunt = async () => {
+    startHunting();
+    for (let i = 0; i < 160; i++) await jest.advanceTimersByTimeAsync(500);
+    const calls = (browser.runtime.sendMessage as jest.Mock).mock.calls.map(c => c[0]);
+    return calls.find((c: { action: string }) => c.action === 'huntingComplete') as
+      { count: number } | undefined;
+  };
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => {
+    if (clickHandler) document.removeEventListener('click', clickHandler);
+    backSpy?.mockRestore();
+    jest.useRealTimers();
+  });
+
+  it('counts the offer when the detail page shows the added alert', async () => {
+    simulateChase(
+      '<div data-testid="backNavigation"></div><div data-testid="added-to-card-alert"></div>',
+      true
+    );
+    expect(await runHunt()).toMatchObject({ count: 1 });
+  });
+
+  it('counts the offer via the list when the detail page has no alert', async () => {
+    simulateChase('<div data-testid="backNavigation"></div><p>Offer details</p>', true);
+    expect(await runHunt()).toMatchObject({ count: 1 });
+  });
+
+  it('does not count an offer that was never added, even if the page says "success"', async () => {
+    simulateChase(
+      '<div data-testid="backNavigation"></div><p>Earn cash back with success.</p>',
+      false
+    );
+    const complete = await runHunt();
+    expect(complete).toMatchObject({ count: 0 });
+    // Retried, then given up on after 3 failed attempts
+    expect(backSpy.mock.calls.length).toBe(3);
+  });
+});

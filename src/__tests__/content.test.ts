@@ -7,6 +7,8 @@ import {
   refreshUnprocessedOffers,
   waitForOfferConfirmation,
   resetState,
+  isDetailPageConfirmed,
+  isTileAddedOnList,
 } from '../js/content';
 
 // Offer tile DOM helper
@@ -236,5 +238,60 @@ describe('waitForOfferConfirmation', () => {
 
     document.body.removeChild(tile);
     jest.useRealTimers();
+  });
+});
+
+describe('isDetailPageConfirmed', () => {
+  it('accepts the dedicated added-to-card alert', () => {
+    document.body.innerHTML = '<div data-testid="added-to-card-alert">Added</div>';
+    expect(isDetailPageConfirmed()).toBe(true);
+  });
+
+  it('accepts "Added to card" inside an alert region', () => {
+    document.body.innerHTML = '<div role="status">Success! Offer added to card.</div>';
+    expect(isDetailPageConfirmed()).toBe(true);
+  });
+
+  it('accepts "added to your card" in an aria-live region', () => {
+    document.body.innerHTML = '<p aria-live="polite">This offer was added to your card</p>';
+    expect(isDetailPageConfirmed()).toBe(true);
+  });
+
+  it('ignores the word "success" elsewhere on the page (old false positive)', () => {
+    document.body.innerHTML = `
+      <div data-testid="backNavigation">Back</div>
+      <p>Your success is our priority. Terms apply.</p>
+    `;
+    expect(isDetailPageConfirmed()).toBe(false);
+  });
+
+  it('ignores "Added to card" outside alert regions, e.g. on other tiles', () => {
+    document.body.innerHTML = `
+      <div data-testid="backNavigation">Back</div>
+      <section>Similar offers: <span>Added to card</span></section>
+    `;
+    expect(isDetailPageConfirmed()).toBe(false);
+  });
+
+  it('ignores alert regions about something else', () => {
+    document.body.innerHTML = '<div role="alert">Something went wrong. Try again.</div>';
+    expect(isDetailPageConfirmed()).toBe(false);
+  });
+});
+
+describe('isTileAddedOnList', () => {
+  it('is true when the tile with that id shows as added', () => {
+    document.body.innerHTML = makeOfferTile('t1', 'Success Added', 'ico_checkmark_filled');
+    expect(isTileAddedOnList('t1')).toBe(true);
+  });
+
+  it('is false when the tile is still addable', () => {
+    document.body.innerHTML = makeOfferTile('t1', 'Add offer', 'ico_add_circle');
+    expect(isTileAddedOnList('t1')).toBe(false);
+  });
+
+  it('is false when the tile is not on the page', () => {
+    document.body.innerHTML = '';
+    expect(isTileAddedOnList('missing')).toBe(false);
   });
 });

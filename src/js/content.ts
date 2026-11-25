@@ -20,6 +20,8 @@ const config = {
     scrollSettle: 400,
     confirmationTimeout: 5000,
     detailPageTimeout: 4000,
+    detailConfirmTimeout: 3000,
+    listConfirmTimeout: 2000,
     backNavigationTimeout: 5000,
   },
 };
@@ -204,13 +206,43 @@ const waitForDetailPage = async (maxWait = config.delays.detailPageTimeout): Pro
   return false;
 };
 
+const DETAIL_ADDED_ALERT = '[data-testid="added-to-card-alert"]';
+// Only text inside announcement regions counts; never the whole page, which
+// can contain unrelated words like "success" or other tiles marked "Added".
+const ALERT_REGIONS = '[role="alert"], [role="status"], [aria-live]';
+const ADDED_TEXT = /\badded to (your )?card\b/i;
+
 /**
  * Checks if the detail page shows a successful "Added to card" confirmation.
+ * Exported for tests.
  */
-const isDetailPageConfirmed = (): boolean => {
-  if (document.querySelector('[data-testid="added-to-card-alert"]')) return true;
-  const body = document.body.textContent?.toLowerCase() ?? '';
-  return body.includes('added to card') || body.includes('success');
+export const isDetailPageConfirmed = (): boolean => {
+  if (document.querySelector(DETAIL_ADDED_ALERT)) return true;
+  return Array.from(document.querySelectorAll(ALERT_REGIONS)).some(el =>
+    ADDED_TEXT.test(el.textContent ?? '')
+  );
+};
+
+/**
+ * Polls until `check` passes or the timeout expires.
+ */
+const pollFor = async (check: () => boolean, maxWait: number): Promise<boolean> => {
+  const start = Date.now();
+  while (Date.now() - start < maxWait) {
+    if (check()) return true;
+    await new Promise(r => setTimeout(r, config.delays.checkInterval));
+  }
+  return check();
+};
+
+/**
+ * After returning to the list, checks whether the tile now shows as added.
+ * Looks the tile up by id because the SPA may re-render the list.
+ * Exported for tests.
+ */
+export const isTileAddedOnList = (tileId: string): boolean => {
+  const tile = document.getElementById(tileId);
+  return tile !== null && isAlreadyAdded(tile);
 };
 
 /**
@@ -292,9 +324,20 @@ const processNextOffer = async (): Promise<void> => {
     let confirmed = false;
 
     if (navigatedToDetail) {
-      confirmed = isDetailPageConfirmed();
-      console.log(`📋 Detail page: ${confirmed ? 'confirmed ✅' : 'not confirmed ❌'}`);
+      // The alert can render after the page itself, so wait for it.
+      const detailConfirmed = await pollFor(
+        isDetailPageConfirmed,
+        config.delays.detailConfirmTimeout
+      );
       await navigateBackToList();
+      // Cross-check on the list using the same signals as the initial scan.
+      confirmed =
+        detailConfirmed ||
+        (await pollFor(() => isTileAddedOnList(tileId), config.delays.listConfirmTimeout));
+      console.log(
+        `📋 Offer ${tileId}: ${confirmed ? 'confirmed ✅' : 'not confirmed ❌'}` +
+          (confirmed && !detailConfirmed ? ' (via list)' : '')
+      );
     } else {
       // Fallback: stayed on list page (inline add)
       confirmed = await waitForOfferConfirmation(nextOffer);

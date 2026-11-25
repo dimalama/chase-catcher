@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ChaseCatcher</title>
   <style>
     body {
@@ -92,6 +93,75 @@
       min-height: 16px;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
+    #disclaimer {
+      font-size: 12px;
+      line-height: 1.45;
+      color: #2c3e50;
+      background-color: #fff;
+      border: 1px solid #e1e5e8;
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    #disclaimer h2 {
+      font-size: 14px;
+      margin: 0 0 6px;
+    }
+
+    #disclaimer p {
+      margin: 0 0 8px;
+    }
+
+    #acceptBtn {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+    }
+
+    #acceptBtn:hover {
+      background-color: #1a252f;
+    }
+
+    a {
+      color: #2980b9;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 10px;
+      color: #95a5a6;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    /* Touch devices (Safari on iPhone/iPad, Firefox on Android): the popup is
+       shown as a full-width sheet, so drop the fixed desktop width. */
+    @media (hover: none) and (pointer: coarse) {
+      body {
+        width: auto;
+        max-width: 480px;
+        margin: 0 auto;
+      }
+
+      button {
+        padding: 14px;
+        font-size: 16px;
+      }
+
+      #disclaimer,
+      #status {
+        font-size: 15px;
+      }
+
+      .footer {
+        font-size: 12px;
+      }
+    }
+
     #statsDisplay {
       text-align: center;
       font-size: 12px;
@@ -109,14 +179,37 @@
   <div class="title">
     <span class="icon">🎯</span>Chase Catcher
   </div>
-  <button id="startBtn">🎯 Start Catching</button>
-  <button id="stopBtn">⏸ Stop</button>
-  <div id="status">Ready to catch some rewards!</div>
-  <div id="progressBar">
-    <div id="progressFill"></div>
-  </div>
-  <div id="offerCount"></div>
-  <div id="statsDisplay"></div>
+  <section id="disclaimer" hidden>
+    <h2>Before you start</h2>
+    <p>Chase Catcher is an independent, open-source tool. It is <strong>not affiliated with, endorsed by, or
+        connected to JPMorgan Chase &amp; Co.</strong></p>
+    <p>It automatically clicks offers in your own Chase account. Automated activity may conflict with
+      Chase's terms of use. <strong>You use it entirely at your own risk and you are solely responsible for
+        how you use it.</strong></p>
+    <p>The software is provided "as is", without warranty of any kind. The author is not liable for any
+      loss or damage arising from its use, including account restrictions, missed or incorrect offers, or
+      financial loss.</p>
+    <button id="acceptBtn">I understand and accept</button>
+    <div class="footer">
+      <a href="https://github.com/dimalama/chase-catcher/blob/main/DISCLAIMER.md" target="_blank"
+        rel="noopener noreferrer">Read the full disclaimer</a>
+    </div>
+  </section>
+  <main id="main" hidden>
+    <button id="startBtn">🎯 Start Catching</button>
+    <button id="stopBtn">⏸ Stop</button>
+    <div id="status">Ready to catch some rewards!</div>
+    <div id="progressBar">
+      <div id="progressFill"></div>
+    </div>
+    <div id="offerCount"></div>
+    <div id="statsDisplay"></div>
+    <div class="footer">
+      Use at your own risk. Not affiliated with Chase.
+      <a href="https://github.com/dimalama/chase-catcher/blob/main/DISCLAIMER.md" target="_blank"
+        rel="noopener noreferrer">Disclaimer</a>
+    </div>
+  </main>
   <script src="../dist/popup.js"></script>
 </body>
 

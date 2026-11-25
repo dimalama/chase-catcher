@@ -38,6 +38,8 @@
 ### Git Workflow
 - Work on feature branches (e.g., claude/feature-name)
 - Write clear commit messages following conventional commits style
+- Never add AI attribution to commits or PRs: no `Co-Authored-By: Claude` (or any Claude/AI co-author),
+  no `Claude-Session` links, and no "Generated with Claude Code" lines in PR descriptions
 - Push changes to the designated branch
 - Create pull requests with detailed descriptions
 
