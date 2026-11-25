@@ -3,6 +3,13 @@
 How to ship Chase Catcher to the Firefox Add-ons store (AMO) and the Apple App Store (Safari on Mac,
 iPhone, and iPad). A short Chrome Web Store section is at the end.
 
+> **First time publishing?** Start with the step-by-step guides. They cover creating the accounts,
+> getting the files without any setup, testing, and common rejections:
+> - [Firefox: first-time guide](docs/publish-firefox.md)
+> - [Safari (iPhone, iPad, Mac): first-time guide](docs/publish-safari.md)
+>
+> This page is the condensed reference for later releases.
+
 | Store | Cost | Needs a Mac? | Typical review | What you upload |
 |---|---|---|---|---|
 | Firefox Add-ons (AMO) | Free | No | Automated check in minutes; human review can take days | `chase-catcher-firefox.zip` + `chase-catcher-source.zip` |

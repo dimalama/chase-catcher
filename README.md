@@ -111,6 +111,7 @@ chase-catcher/
 ├── DISCLAIMER.md          # Terms of use and liability disclaimer
 ├── PRIVACY.md             # Privacy policy (store listings link here)
 ├── PUBLISHING.md          # How to publish to Firefox, Apple, and Chrome stores
+├── docs/                  # First-time store guides (Firefox, Safari)
 ├── public/
 │   ├── popup.html         # Extension popup UI
 │   └── icons/             # Extension icons (16, 48, 128)
