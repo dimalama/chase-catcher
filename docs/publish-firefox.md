@@ -70,6 +70,9 @@ You need two zip files:
 4. Unzip it. Inside are `chase-catcher-firefox.zip` and `chase-catcher-source.zip`.
    **Do not unzip those two**; upload them as they are.
 
+   If **Artifacts** is empty or says *expired* (downloads are kept for 30 days), open that run, click
+   **Re-run all jobs**, wait about 2 minutes, and refresh the page.
+
 ### Option B: build them on your computer
 1. Install **Node.js 24 LTS** from <https://nodejs.org> (or 22.18+).
 2. In a terminal:

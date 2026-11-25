@@ -115,6 +115,9 @@ You need `chase-catcher-safari.zip`. Get it from GitHub without any setup:
 2. Download the **chase-catcher-extension** artifact and unzip it once. Inside is
    `chase-catcher-safari.zip`.
 
+   If **Artifacts** is empty or says *expired* (downloads are kept for 30 days), open that run, click
+   **Re-run all jobs**, wait about 2 minutes, and refresh the page.
+
 (Or build it yourself: install Node.js 24 LTS, then `npm ci && npm run package` in the repository.)
 
 Every upload needs a **higher version** than the previous one: raise `version` in `manifest.json` and

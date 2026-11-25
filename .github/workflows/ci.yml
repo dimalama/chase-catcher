@@ -172,7 +172,8 @@ jobs:
       with:
         name: chase-catcher-extension
         path: chase-catcher-*.zip
-        retention-days: 5
+        # Long enough to download for a store submission (see docs/publish-*.md)
+        retention-days: 30
 
   size:
     if: github.event_name == 'pull_request'
